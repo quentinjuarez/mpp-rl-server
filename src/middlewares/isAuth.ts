@@ -27,8 +27,7 @@ export default function isAuth(
     const token = match[1];
 
     const decoded = jwt.verify(token, process.env.API_KEY);
-    // @ts-ignore
-    req.auth = decoded;
+    req.auth = decoded as UserAuth;
 
     next();
     return; // Explicit return here

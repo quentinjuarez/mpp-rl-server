@@ -18,6 +18,7 @@ declare global {
     interface Request {
       auth: UserAuth;
       services: ServicesFactory;
+      ipAddress: string;
     }
   }
 }

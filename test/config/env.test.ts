@@ -1,9 +1,7 @@
-import checkEnvVariables, {
-  requiredEnvVariables,
-} from "../../src/utils/config";
-import l from "../../src/utils/logger";
+import checkEnvVariables, { requiredEnvVariables } from "../../src/config/env";
+import l from "../../src/config/logger";
 
-jest.mock("../../src/utils/logger");
+jest.mock("../../src/config/logger");
 
 describe("checkEnvVariables", () => {
   let originalEnv: NodeJS.ProcessEnv;
@@ -25,7 +23,9 @@ describe("checkEnvVariables", () => {
 
     try {
       checkEnvVariables();
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
 
     expect(exitSpy).toHaveBeenCalledWith(1);
     expect(exitSpy).toHaveBeenCalledTimes(1);
@@ -40,19 +40,21 @@ describe("checkEnvVariables", () => {
       "APP_ID",
       "LOG_LEVEL",
       "NODE_ENV",
-      "NOTION_TOKEN",
       "MONGODB_URI",
       "FRONT_URL",
       "BACK_URL",
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
+      "GOOGLE_REDIRECT_URI",
     ]) {
       process.env[envVariable] = "someValue";
     }
 
     try {
       checkEnvVariables();
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
 
     expect(exitSpy).not.toHaveBeenCalled();
   });
@@ -60,7 +62,9 @@ describe("checkEnvVariables", () => {
   it("should log an error for each missing required environment variable", () => {
     try {
       checkEnvVariables();
-    } catch (error) {}
+    } catch (error) {
+      console.error(error);
+    }
 
     expect(l.error).toHaveBeenCalledTimes(requiredEnvVariables.length);
     for (const envVariable of requiredEnvVariables) {

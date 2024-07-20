@@ -1,16 +1,12 @@
 import { Request, Response, NextFunction } from "express";
-import UserService from "./service";
-import { validateEmail } from "../../utils/validators";
-import { SourceTypeEnum } from "../../models/users";
 
 export async function getMe(req: Request, res: Response, next: NextFunction) {
   try {
-    const { userId } = req.auth;
-
-    const user = await UserService.findById(userId);
+    const user = await req.services.userService().getMe();
     if (!user) throw new Error("NOT_FOUND");
 
-    const { password, ...otherFields } = user.toObject();
+    const otherFields = user.toObject();
+    delete otherFields.password;
 
     return res.status(200).json(otherFields).end();
   } catch (err) {
@@ -24,23 +20,18 @@ export async function updateMe(
   next: NextFunction,
 ) {
   try {
-    const {
-      userId,
-      user: { source },
-    } = req.auth;
-    const { username, email } = req.body;
+    const { username } = req.body;
 
-    const isSSO = source !== SourceTypeEnum.INTERNAL;
-    const validatedEmail = validateEmail(email);
-    if (!validatedEmail) throw new Error("BAD_REQUEST");
+    if (!username) throw new Error("BAD_REQUEST");
 
-    const user = await UserService.updateById(userId, {
+    const user = await req.services.userService().updateProfile({
       username,
-      ...(isSSO ? {} : { email: validatedEmail }),
     });
+
     if (!user) throw new Error("UNAUTHORIZED");
 
-    const { password, ...otherFields } = user.toObject();
+    const otherFields = user.toObject();
+    delete otherFields.password;
 
     return res.status(201).json(otherFields).end();
   } catch (err) {
@@ -48,17 +39,23 @@ export async function updateMe(
   }
 }
 
-export async function deleteMe(
+export async function updatePassword(
   req: Request,
   res: Response,
   next: NextFunction,
 ) {
   try {
-    const { userId } = req.auth;
+    const { password } = req.body;
 
-    const result = await UserService.deleteById(userId);
+    if (!password) throw new Error("BAD_REQUEST");
 
-    return res.status(201).json(result).end();
+    const result = await req.services
+      .userService()
+      .updatePassword({ password });
+
+    if (!result) throw new Error("UNAUTHORIZED");
+
+    return res.status(204).end();
   } catch (err) {
     return next(err);
   }

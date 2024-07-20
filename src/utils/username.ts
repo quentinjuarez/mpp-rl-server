@@ -8,7 +8,7 @@ const generateUsername = () => {
   // 4 digit random number
   const randomHash = Math.floor(1000 + Math.random() * 9000);
 
-  return `${randomAdjective}-${randomAnimal}#${randomHash}`;
+  return `${randomAdjective}${randomAnimal}#${randomHash}`;
 };
 
 export default generateUsername;

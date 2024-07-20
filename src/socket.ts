@@ -3,19 +3,19 @@ import type http from "http";
 import { whitelist } from "./config/constant";
 import l from "./config/logger";
 
-const getPlayers = (onlinePlayers: Map<string, WSData>, roomId: string) => {
-  const players = [...onlinePlayers]
+const getUsers = (onlineUsers: Map<string, WSData>, roomId: string) => {
+  const users = [...onlineUsers]
     .filter((val) => val[1].roomId === roomId)
     .map((val) => val[1].connectionId);
 
-  return players;
+  return users;
 };
 
 export default class SocketIO {
   io!: WSServer;
-  onlinePlayers: Map<string, WSData>;
+  onlineUsers: Map<string, WSData>;
   constructor() {
-    this.onlinePlayers = new Map();
+    this.onlineUsers = new Map();
   }
 
   init(httpServer: http.Server) {
@@ -42,17 +42,17 @@ export default class SocketIO {
 
   disconnect(socket: Socket) {
     socket.on("disconnect", async () => {
-      const data = this.onlinePlayers.get(socket.id);
+      const data = this.onlineUsers.get(socket.id);
       if (!data) return;
       const { roomId, connectionId } = data;
 
-      this.onlinePlayers.delete(socket.id);
-      l.info(`${this.onlinePlayers.size} player(s) online !`);
-      const players = getPlayers(this.onlinePlayers, roomId);
+      this.onlineUsers.delete(socket.id);
+      l.info(`${this.onlineUsers.size} user(s) online !`);
+      const users = getUsers(this.onlineUsers, roomId);
 
       this.io.to(roomId).emit("quit", {
         ...data,
-        players,
+        users,
         connectionId,
       });
     });
@@ -62,14 +62,14 @@ export default class SocketIO {
     socket.on("join", async (data: WSPayload) => {
       const { roomId, connectionId } = data;
       socket.join(roomId);
-      this.onlinePlayers.set(socket.id, { roomId, connectionId });
-      l.info(`${this.onlinePlayers.size} player(s) online !`);
+      this.onlineUsers.set(socket.id, { roomId, connectionId });
+      l.info(`${this.onlineUsers.size} user(s) online !`);
 
-      const players = getPlayers(this.onlinePlayers, roomId);
+      const users = getUsers(this.onlineUsers, roomId);
 
       this.io.to(roomId).emit("join", {
         ...data,
-        players,
+        users,
         connectionId,
       });
     });
@@ -79,11 +79,11 @@ export default class SocketIO {
     socket.on("quit", async (data: WSPayload) => {
       const { roomId, connectionId } = data;
 
-      this.onlinePlayers.delete(socket.id);
-      l.info(`${this.onlinePlayers.size} player(s) online !`);
-      const players = getPlayers(this.onlinePlayers, roomId);
+      this.onlineUsers.delete(socket.id);
+      l.info(`${this.onlineUsers.size} user(s) online !`);
+      const users = getUsers(this.onlineUsers, roomId);
 
-      this.io.to(roomId).emit("quit", { ...data, players, connectionId });
+      this.io.to(roomId).emit("quit", { ...data, users, connectionId });
     });
   }
 }

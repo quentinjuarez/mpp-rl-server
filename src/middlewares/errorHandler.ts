@@ -30,7 +30,7 @@ export default function errorHandler(
     (error.message && ERROR_MAP[error.message]) ||
     ERROR_MAP.INTERNAL_SERVER_ERROR;
 
-  res
+  return res
     .status(statusCode)
     .json(isDev ? { statusCode, message, stack: error.stack } : message)
     .end();

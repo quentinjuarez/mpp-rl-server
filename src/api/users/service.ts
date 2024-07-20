@@ -44,15 +44,11 @@ export class UserService {
   }
 
   async updateProfile({
-    firstName,
-    lastName,
     username,
   }: {
-    firstName: string;
-    lastName: string;
     username: string;
   }): Promise<UserDocument | false> {
-    return this.update({ username, firstName, lastName });
+    return this.update({ username });
   }
 
   async updatePassword({ password }: { password: string }): Promise<boolean> {

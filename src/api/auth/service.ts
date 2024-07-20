@@ -112,7 +112,6 @@ export class AuthService {
   }
 
   async registerGoogle({
-    username,
     firstName,
     lastName,
     email,
@@ -120,7 +119,6 @@ export class AuthService {
     externalId,
     source,
   }: {
-    username: string;
     firstName?: string;
     lastName?: string;
     email: string;
@@ -130,7 +128,7 @@ export class AuthService {
   }): Promise<{ user: UserDocument; token: string } | null> {
     try {
       const newUser = new User({
-        username,
+        username: generateUsername(),
         firstName,
         lastName,
         email,

@@ -3,7 +3,7 @@ import jwt from "jsonwebtoken";
 import isAuth from "../../src/middlewares/isAuth";
 
 interface CustomRequest extends Request {
-  auth?: any;
+  auth: UserAuth;
 }
 
 describe("isAuth middleware", () => {

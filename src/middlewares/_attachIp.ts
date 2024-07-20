@@ -5,7 +5,6 @@ export default function attachIp(
   _res: Response,
   next: NextFunction,
 ) {
-  // @ts-ignore
-  req.ipAddress = req.headers["x-forwarded-for"];
+  req.ipAddress = req.headers["x-forwarded-for"] as string;
   next();
 }

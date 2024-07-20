@@ -12,7 +12,7 @@ class ServicesFactory {
   users?: UserService;
 
   constructor(req: Request) {
-    this.userId = req.auth.userId;
+    this.userId = req.auth?.userId;
     this.logger = logger.child({ userId: this.userId });
   }
 

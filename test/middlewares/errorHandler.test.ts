@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import errorHandler from "../../src/middlewares/errorHandler";
 
-jest.mock("../../src/utils/logger");
+jest.mock("../../src/config/logger");
 
 describe("errorHandler middleware", () => {
   let error: Error;

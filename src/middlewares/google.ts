@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
-import { User, SourceTypeEnum } from "../models/users";
-import AuthService from "../api/auth/service";
+import { User } from "../models/users";
+import ServicesFactory from "../factories/services";
 
 const initGoogleStrategy = () => {
   passport.use(
@@ -13,8 +13,8 @@ const initGoogleStrategy = () => {
         clientSecret: process.env.GOOGLE_CLIENT_SECRET,
         passReqToCallback: true,
       },
-      async (_req, _accessToken, _refreshToken, profile, done) => {
-        const { displayName, id, emails, photos, name } = profile;
+      async (req, _accessToken, _refreshToken, profile, done) => {
+        const { id, emails, photos, name } = profile;
 
         const email = emails?.[0].value;
         const photo = photos?.[0].value;
@@ -27,9 +27,11 @@ const initGoogleStrategy = () => {
         // check if user already exists
         const currentUser = await User.findOne({ externalId: id });
 
+        const authService = ServicesFactory.init(req).authService();
+
         if (currentUser) {
           // already have the user -> login and return token
-          const googleAuth = await AuthService.loginGoogle({
+          const googleAuth = await authService.loginGoogle({
             user: currentUser,
           });
 
@@ -40,14 +42,13 @@ const initGoogleStrategy = () => {
           return done(null, token);
         } else {
           // register user and return token
-          const googleAuth = await AuthService.registerGoogle({
+          const googleAuth = await authService.registerGoogle({
             externalId: id,
-            username: displayName,
             firstName,
             lastName,
             email,
             profilePicture: photo,
-            source: SourceTypeEnum.GOOGLE,
+            source: "google",
           });
 
           if (!googleAuth) throw new Error("INTERNAL_SERVER_ERROR");
