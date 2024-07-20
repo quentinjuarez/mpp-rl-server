@@ -1,0 +1,2 @@
+RewriteEngine on
+RewriteRule ^(.*)$ https://quentinjuarez.alwaysdata.net/$1 [L,R=301]
