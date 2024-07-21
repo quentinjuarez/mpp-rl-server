@@ -1,17 +1,13 @@
 {
-  "name": "quentinjuarez-server",
+  "name": "mpp-rl-server",
   "private": true,
   "version": "1.0.0",
-  "description": "quentinjuarez-server",
+  "description": "mpp-rl-server",
   "main": "dist/index.js",
   "scripts": {
     "start": "node dist/index.js",
     "dev": "nodemon src/index.ts | pino-pretty",
     "build": "tsc -p .",
-    "build-prod-test": "set NODE_ENV=production && yarn build",
-    "copy": "node scripts/copy_assets.js",
-    "deploy": "yarn build && cd deploy && script.bat",
-    "test-dev": "env-cmd -f .env.test jest",
     "test": "jest",
     "lint": "eslint . --ext .ts --fix",
     "format": "prettier --write ."
