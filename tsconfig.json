@@ -20,9 +20,10 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
-    "declaration": false
+    "declaration": false,
+    "typeRoots": ["./node_modules/@types", "./types"]
   },
-  "include": ["src/**/*.ts", "**/*.d.ts", "src/**/*.json"],
-  "exclude": ["node_modules", "**/*.test.ts", "**/*.e2e.ts"],
+  "include": ["src"],
+  "exclude": ["test"],
   "files": ["./src/index.ts", "./src/types/global.d.ts"]
 }
