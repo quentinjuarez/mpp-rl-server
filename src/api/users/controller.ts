@@ -80,3 +80,47 @@ export async function checkUsername(
     return next(err);
   }
 }
+
+export async function getLeaderboard(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const users = await req.services.userService().getUsers();
+
+    const userIds = users.map((user) => user._id);
+
+    const points = await req.services
+      .forecastService()
+      .getPointsByUsers(userIds);
+
+    const leaderboard = users.map((user) => ({
+      ...user.toObject(),
+      points: points[user._id] || 0,
+    }));
+
+    return res.status(200).json({ leaderboard }).end();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function getUser(req: Request, res: Response, next: NextFunction) {
+  try {
+    const { username } = req.params;
+
+    if (!username) throw new Error("BAD_REQUEST");
+
+    const user = await req.services.userService().getUser(username);
+
+    if (!user) throw new Error("NOT_FOUND");
+
+    const otherFields = user.toObject();
+    delete otherFields.password;
+
+    return res.status(200).json(otherFields).end();
+  } catch (err) {
+    return next(err);
+  }
+}

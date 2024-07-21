@@ -1,6 +1,13 @@
 import { Router } from "express";
 
-import { getMe, updateMe, updatePassword, checkUsername } from "./controller";
+import {
+  getMe,
+  updateMe,
+  updatePassword,
+  checkUsername,
+  getLeaderboard,
+  getUser,
+} from "./controller";
 import isAuth from "../../middlewares/isAuth";
 import sanitizeString from "../../middlewares/sanitizeString";
 import attachServices from "../../middlewares/services";
@@ -24,5 +31,7 @@ router.post(
   updatePassword,
 );
 router.post("/username/check", isAuth, attachServices, checkUsername);
+router.get("/leaderboard", isAuth, attachServices, getLeaderboard);
+router.get("/:username", isAuth, attachServices, getUser);
 
 export default router;

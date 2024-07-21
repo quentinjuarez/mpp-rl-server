@@ -88,6 +88,30 @@ export class UserService {
       return false;
     }
   }
+
+  async getUsers(): Promise<UserDocument[]> {
+    try {
+      const users = await User.find().select("_id username");
+
+      return users;
+    } catch (err) {
+      this.logger.error(err);
+      return [];
+    }
+  }
+
+  async getUser(username: string): Promise<UserDocument | null> {
+    try {
+      const user = await User.findOne({
+        username,
+      }).select("_id username");
+
+      return user;
+    } catch (err) {
+      this.logger.error(err);
+      return null;
+    }
+  }
 }
 
 export default UserService;

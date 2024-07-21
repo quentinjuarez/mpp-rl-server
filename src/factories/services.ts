@@ -3,6 +3,7 @@ import type { Logger } from "pino";
 import logger from "../config/logger";
 import AuthService from "../api/auth/service";
 import UserService from "../api/users/service";
+import ForecastService from "../api/forecasts/service";
 
 class ServicesFactory {
   userId: string;
@@ -10,6 +11,7 @@ class ServicesFactory {
 
   auth?: AuthService;
   users?: UserService;
+  forecasts?: ForecastService;
 
   constructor(req: Request) {
     this.userId = req.auth?.userId;
@@ -37,6 +39,16 @@ class ServicesFactory {
       });
     }
     return this.users;
+  }
+
+  forecastService() {
+    if (!this.forecasts) {
+      this.forecasts = new ForecastService({
+        logger: this.logger.child({ service: "ForecastService" }),
+        userId: this.userId,
+      });
+    }
+    return this.forecasts;
   }
 }
 
