@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { isValidPassword, isValidUsername } from "../../utils/validators";
 
 export async function getMe(req: Request, res: Response, next: NextFunction) {
   try {
@@ -22,7 +23,7 @@ export async function updateMe(
   try {
     const { username } = req.body;
 
-    if (!username) throw new Error("BAD_REQUEST");
+    if (!isValidUsername(username)) throw new Error("BAD_REQUEST");
 
     const user = await req.services.userService().updateProfile({
       username,
@@ -45,17 +46,36 @@ export async function updatePassword(
   next: NextFunction,
 ) {
   try {
-    const { password } = req.body;
+    const { oldPassword, newPassword } = req.body;
 
-    if (!password) throw new Error("BAD_REQUEST");
+    if (!isValidPassword(oldPassword) || !isValidPassword(newPassword))
+      throw new Error("BAD_REQUEST");
 
     const result = await req.services
       .userService()
-      .updatePassword({ password });
+      .updatePassword({ oldPassword, newPassword });
 
     if (!result) throw new Error("UNAUTHORIZED");
 
     return res.status(204).end();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function checkUsername(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { username } = req.body;
+
+    if (!username) throw new Error("BAD_REQUEST");
+
+    const result = await req.services.userService().checkUsername(username);
+
+    return res.status(200).json(result).end();
   } catch (err) {
     return next(err);
   }

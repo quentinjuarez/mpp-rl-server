@@ -1,6 +1,7 @@
 import type { Logger } from "pino";
 import { User } from "../../models/users";
 import type { UserDocument } from "../../models/users";
+import decryptPassword from "../../utils/decryptPassword";
 
 export class UserService {
   private logger: Logger;
@@ -51,16 +52,37 @@ export class UserService {
     return this.update({ username });
   }
 
-  async updatePassword({ password }: { password: string }): Promise<boolean> {
+  async updatePassword({
+    oldPassword,
+    newPassword,
+  }: {
+    oldPassword: string;
+    newPassword: string;
+  }): Promise<boolean> {
     try {
       const user = await User.findOne({ _id: this.userId });
       if (!user) return false;
 
-      user.password = password;
+      const isValid = await decryptPassword(oldPassword, user.password);
+
+      if (!isValid) throw new Error("WRONG_PASSWORD");
+
+      user.password = newPassword;
 
       await user.save();
 
       return true;
+    } catch (err) {
+      this.logger.error(err);
+      return false;
+    }
+  }
+
+  async checkUsername(username: string): Promise<boolean> {
+    try {
+      const user = await User.findOne({ username });
+
+      return !user;
     } catch (err) {
       this.logger.error(err);
       return false;

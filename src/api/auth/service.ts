@@ -1,16 +1,9 @@
 import type { Logger } from "pino";
 import jwt from "jsonwebtoken";
-import bcrypt from "bcrypt";
 import { User } from "../../models/users";
 import type { SourceType, UserDocument } from "../../models/users";
 import generateUsername from "../../utils/username";
-
-const decryptPassword = async (
-  candidatePassword: string,
-  password: string,
-): Promise<boolean> => {
-  return await bcrypt.compare(candidatePassword, password);
-};
+import decryptPassword from "../../utils/decryptPassword";
 
 export class AuthService {
   private logger: Logger;
