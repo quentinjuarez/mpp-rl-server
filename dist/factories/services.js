@@ -7,12 +7,14 @@ const logger_1 = __importDefault(require("../config/logger"));
 const service_1 = __importDefault(require("../api/auth/service"));
 const service_2 = __importDefault(require("../api/users/service"));
 const service_3 = __importDefault(require("../api/forecasts/service"));
+const rl_1 = __importDefault(require("../adapters/rl"));
 class ServicesFactory {
     userId;
     logger;
     auth;
     users;
     forecasts;
+    rl;
     constructor(req) {
         this.userId = req.auth?.userId;
         this.logger = logger_1.default.child({ userId: this.userId });
@@ -42,9 +44,16 @@ class ServicesFactory {
             this.forecasts = new service_3.default({
                 logger: this.logger.child({ service: "ForecastService" }),
                 userId: this.userId,
+                rlAdapter: this.rlAdapter(),
             });
         }
         return this.forecasts;
+    }
+    rlAdapter() {
+        if (!this.rl) {
+            this.rl = new rl_1.default();
+        }
+        return this.rl;
     }
 }
 exports.default = ServicesFactory;

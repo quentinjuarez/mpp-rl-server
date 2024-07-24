@@ -5,9 +5,11 @@ const forecasts_1 = require("../../models/forecasts");
 class ForecastService {
     logger;
     userId;
-    constructor({ logger, userId }) {
+    rlAdapter;
+    constructor({ logger, userId, rlAdapter, }) {
         this.logger = logger;
         this.userId = userId;
+        this.rlAdapter = rlAdapter;
     }
     async getAll() {
         try {
@@ -42,41 +44,50 @@ class ForecastService {
     }
     async getPointsByUser(userId) {
         try {
-            const forecasts = await forecasts_1.Forecast.find({
-                userId,
-                processed: true,
-            });
-            return forecasts.reduce((acc, forecast) => {
-                if (forecast.correct) {
-                    return acc + 100;
-                }
-                if (forecast.exact) {
-                    return acc + 50;
-                }
-                return acc;
-            }, 0);
-        }
-        catch (err) {
-            this.logger.error(err);
-            return 0;
-        }
-    }
-    async getPoints() {
-        return this.getPointsByUser(this.userId);
-    }
-    async getPointsByUsers(userIds) {
-        try {
-            const points = await forecasts_1.Forecast.aggregate([
-                { $match: { userId: { $in: userIds }, processed: true } },
+            const res = await forecasts_1.Forecast.aggregate([
+                { $match: { userId: String(userId), processed: true } },
                 {
                     $group: {
                         _id: "$userId",
                         points: {
                             $sum: {
                                 $cond: [
-                                    { $eq: ["$correct", true] },
-                                    100,
-                                    { $cond: [{ $eq: ["$exact", true] }, 50, 0] },
+                                    { $eq: ["$exact", true] }, // Check for exact first
+                                    150, // 150 points if exact is true
+                                    {
+                                        $cond: [{ $eq: ["$correct", true] }, 100, 0],
+                                    },
+                                ],
+                            },
+                        },
+                    },
+                },
+            ]);
+            return res.length ? res[0].points : 0;
+        }
+        catch (err) {
+            this.logger.error(err);
+            return 0;
+        }
+    }
+    async getMyPoints() {
+        return this.getPointsByUser(this.userId);
+    }
+    async getPoints() {
+        try {
+            const points = await forecasts_1.Forecast.aggregate([
+                { $match: { processed: true } },
+                {
+                    $group: {
+                        _id: "$userId",
+                        points: {
+                            $sum: {
+                                $cond: [
+                                    { $eq: ["$exact", true] }, // Check for exact first
+                                    150, // 150 points if exact is true
+                                    {
+                                        $cond: [{ $eq: ["$correct", true] }, 100, 0],
+                                    },
                                 ],
                             },
                         },
@@ -91,6 +102,60 @@ class ForecastService {
         }
         catch (err) {
             this.logger.error(err);
+            return {};
+        }
+    }
+    async computeForecast() {
+        try {
+            const forecasts = await forecasts_1.Forecast.find({
+                userId: this.userId,
+                processed: false,
+            });
+            for (const forecast of forecasts) {
+                const match = await this.rlAdapter.getMatch(forecast.matchId);
+                const hasWinner = match.blue.winner || match.orange.winner;
+                if (!hasWinner) {
+                    continue;
+                }
+                const blueScore = match.blue.score;
+                const orangeScore = match.orange.score;
+                const blueWins = blueScore > orangeScore;
+                const forecastBlueWins = forecast.blue > forecast.orange;
+                const correct = blueWins === forecastBlueWins;
+                const exact = blueScore === forecast.blue && orangeScore === forecast.orange;
+                await forecasts_1.Forecast.updateOne({ _id: forecast._id }, { $set: { correct, exact, processed: true } });
+            }
+            return true;
+        }
+        catch (err) {
+            this.logger.error(err);
+            return false;
+        }
+    }
+    async getForecastsResults() {
+        try {
+            const res = await forecasts_1.Forecast.aggregate([
+                {
+                    $match: {
+                        userId: this.userId,
+                    },
+                },
+                {
+                    $group: {
+                        _id: "$matchId",
+                        forecasts: {
+                            $push: "$$ROOT",
+                        },
+                    },
+                },
+            ]);
+            return res.reduce((acc, { _id, forecasts }) => {
+                acc[_id] = forecasts[0];
+                return acc;
+            }, {});
+        }
+        catch (error) {
+            this.logger.error(error);
             return {};
         }
     }

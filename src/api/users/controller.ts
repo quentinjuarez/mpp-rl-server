@@ -89,11 +89,7 @@ export async function getLeaderboard(
   try {
     const users = await req.services.userService().getUsers();
 
-    const userIds = users.map((user) => user._id);
-
-    const points = await req.services
-      .forecastService()
-      .getPointsByUsers(userIds);
+    const points = await req.services.forecastService().getPoints();
 
     const leaderboard = users.map((user) => ({
       ...user.toObject(),
@@ -116,7 +112,12 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
 
     if (!user) throw new Error("NOT_FOUND");
 
+    const points = await req.services
+      .forecastService()
+      .getPointsByUser(user._id);
+
     const otherFields = user.toObject();
+    otherFields.points = points;
     delete otherFields.password;
 
     return res.status(200).json(otherFields).end();

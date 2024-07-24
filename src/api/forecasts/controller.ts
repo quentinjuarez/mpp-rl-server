@@ -46,9 +46,29 @@ export async function getPoints(
   next: NextFunction,
 ) {
   try {
-    const points = await req.services.forecastService().getPoints();
+    const forecastService = req.services.forecastService();
+
+    await forecastService.computeForecast();
+
+    const points = await forecastService.getMyPoints();
 
     return res.status(200).json({ points }).end();
+  } catch (err) {
+    return next(err);
+  }
+}
+
+export async function getForecastsResults(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const forecasts = await req.services
+      .forecastService()
+      .getForecastsResults();
+
+    return res.status(200).json({ forecasts }).end();
   } catch (err) {
     return next(err);
   }

@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAll = getAll;
 exports.createOrUpdate = createOrUpdate;
 exports.getPoints = getPoints;
+exports.getForecastsResults = getForecastsResults;
 async function getAll(req, res, next) {
     try {
         const forecasts = await req.services.forecastService().getAll();
@@ -35,8 +36,21 @@ async function createOrUpdate(req, res, next) {
 }
 async function getPoints(req, res, next) {
     try {
-        const points = await req.services.forecastService().getPoints();
+        const forecastService = req.services.forecastService();
+        await forecastService.computeForecast();
+        const points = await forecastService.getMyPoints();
         return res.status(200).json({ points }).end();
+    }
+    catch (err) {
+        return next(err);
+    }
+}
+async function getForecastsResults(req, res, next) {
+    try {
+        const forecasts = await req.services
+            .forecastService()
+            .getForecastsResults();
+        return res.status(200).json({ forecasts }).end();
     }
     catch (err) {
         return next(err);

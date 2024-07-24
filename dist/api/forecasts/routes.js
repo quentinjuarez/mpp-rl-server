@@ -11,4 +11,5 @@ const router = (0, express_1.Router)();
 router.get("/", isAuth_1.default, services_1.default, controller_1.getAll);
 router.post("/", isAuth_1.default, services_1.default, controller_1.createOrUpdate);
 router.get("/points", isAuth_1.default, services_1.default, controller_1.getPoints);
+router.get("/results", isAuth_1.default, services_1.default, controller_1.getForecastsResults);
 exports.default = router;

@@ -4,6 +4,7 @@ import logger from "../config/logger";
 import AuthService from "../api/auth/service";
 import UserService from "../api/users/service";
 import ForecastService from "../api/forecasts/service";
+import RLAdapter from "../adapters/rl";
 
 class ServicesFactory {
   userId: string;
@@ -12,6 +13,8 @@ class ServicesFactory {
   auth?: AuthService;
   users?: UserService;
   forecasts?: ForecastService;
+
+  rl?: RLAdapter;
 
   constructor(req: Request) {
     this.userId = req.auth?.userId;
@@ -46,9 +49,17 @@ class ServicesFactory {
       this.forecasts = new ForecastService({
         logger: this.logger.child({ service: "ForecastService" }),
         userId: this.userId,
+        rlAdapter: this.rlAdapter(),
       });
     }
     return this.forecasts;
+  }
+
+  rlAdapter() {
+    if (!this.rl) {
+      this.rl = new RLAdapter();
+    }
+    return this.rl;
   }
 }
 
