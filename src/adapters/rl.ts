@@ -6,7 +6,8 @@ class RLAdapter {
 
   constructor() {
     this.client = axios.create({
-      baseURL: "https://zsr.octane.gg",
+      // baseURL: "https://zsr.octane.gg",
+      baseURL: "https://api.slokh.gg",
     });
   }
 

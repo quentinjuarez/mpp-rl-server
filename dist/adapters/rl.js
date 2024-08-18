@@ -8,7 +8,8 @@ class RLAdapter {
     client;
     constructor() {
         this.client = axios_1.default.create({
-            baseURL: "https://zsr.octane.gg",
+            // baseURL: "https://zsr.octane.gg",
+            baseURL: "https://api.slokh.gg",
         });
     }
     async getMatch(slug) {
