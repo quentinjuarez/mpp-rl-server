@@ -37,12 +37,12 @@ export class ForecastService {
     try {
       const existingForecast = await Forecast.findOne({
         userId: this.userId,
-        matchId: payload.matchId,
+        matchSlug: payload.matchSlug,
       });
 
       if (existingForecast) {
         const forecast = await Forecast.findOneAndUpdate(
-          { userId: this.userId, matchId: payload.matchId },
+          { userId: this.userId, matchSlug: payload.matchSlug },
           { ...payload },
           { new: true },
         );
@@ -62,10 +62,16 @@ export class ForecastService {
     }
   }
 
-  async getPointsByUser(userId: string): Promise<number> {
+  async getPointsByUser(userId: string, eventSlug?: string): Promise<number> {
     try {
       const res = await Forecast.aggregate([
-        { $match: { userId: String(userId), processed: true } },
+        {
+          $match: {
+            userId: String(userId),
+            processed: true,
+            ...(eventSlug ? { eventSlug } : {}),
+          },
+        },
         {
           $group: {
             _id: "$userId",
@@ -91,14 +97,14 @@ export class ForecastService {
     }
   }
 
-  async getMyPoints(): Promise<number> {
-    return this.getPointsByUser(this.userId);
+  async getMyPoints(eventSlug?: string): Promise<number> {
+    return this.getPointsByUser(this.userId, eventSlug);
   }
 
-  async getPoints(): Promise<{ [key: string]: number }> {
+  async getPoints(eventSlug?: string): Promise<{ [userId: string]: number }> {
     try {
       const points = await Forecast.aggregate([
-        { $match: { processed: true } },
+        { $match: { processed: true, ...(eventSlug ? { eventSlug } : {}) } },
         {
           $group: {
             _id: "$userId",
@@ -128,7 +134,7 @@ export class ForecastService {
     }
   }
 
-  async computeForecast(): Promise<boolean> {
+  async computeMyForecasts(): Promise<boolean> {
     try {
       const forecasts = await Forecast.find({
         userId: this.userId,
@@ -136,7 +142,7 @@ export class ForecastService {
       });
 
       for (const forecast of forecasts) {
-        const match = await this.rlAdapter.getMatch(forecast.matchId);
+        const match = await this.rlAdapter.getMatch(forecast.matchSlug);
 
         const hasWinner = match.blue.winner || match.orange.winner;
 
@@ -167,17 +173,73 @@ export class ForecastService {
     }
   }
 
-  async getForecastsResults(): Promise<Record<string, ForecastDocument>> {
+  async computeAllForecasts(): Promise<boolean> {
+    try {
+      // Fetch all unprocessed forecasts grouped by matchSlug
+      const forecasts = await Forecast.find({ processed: false });
+
+      // Group forecasts by matchSlug
+      const forecastsByMatch = forecasts.reduce(
+        (acc, forecast) => {
+          if (!acc[forecast.matchSlug]) {
+            acc[forecast.matchSlug] = [];
+          }
+          acc[forecast.matchSlug].push(forecast);
+          return acc;
+        },
+        {} as Record<string, ForecastDocument[]>,
+      );
+
+      // Loop through each matchSlug group
+      for (const matchSlug of Object.keys(forecastsByMatch)) {
+        const match = await this.rlAdapter.getMatch(matchSlug);
+        const hasWinner = match.blue.winner || match.orange.winner;
+
+        if (!hasWinner) {
+          continue; // Skip this match if no winner is determined yet
+        }
+
+        const blueScore = match.blue.score;
+        const orangeScore = match.orange.score;
+        const blueWins = blueScore > orangeScore;
+
+        // Process each forecast for the matchSlug
+        const matchForecasts = forecastsByMatch[matchSlug];
+        for (const forecast of matchForecasts) {
+          const forecastBlueWins = forecast.blue > forecast.orange;
+          const correct = blueWins === forecastBlueWins;
+          const exact =
+            blueScore === forecast.blue && orangeScore === forecast.orange;
+
+          // Update the forecast with the result
+          await Forecast.updateOne(
+            { _id: forecast._id },
+            { $set: { correct, exact, processed: true } },
+          );
+        }
+      }
+
+      return true;
+    } catch (err) {
+      this.logger.error(err);
+      return false;
+    }
+  }
+
+  async getForecastsResults(
+    eventSlug?: string,
+  ): Promise<Record<string, ForecastDocument>> {
     try {
       const res = await Forecast.aggregate([
         {
           $match: {
             userId: this.userId,
+            ...(eventSlug ? { eventSlug } : {}),
           },
         },
         {
           $group: {
-            _id: "$matchId",
+            _id: "$matchSlug",
             forecasts: {
               $push: "$$ROOT",
             },

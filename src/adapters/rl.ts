@@ -10,8 +10,8 @@ class RLAdapter {
     });
   }
 
-  async getMatch(id: string) {
-    const response = await this.client.get(`/matches/${id}`);
+  async getMatch(slug: string) {
+    const response = await this.client.get(`/matches/${slug}`);
     return response.data;
   }
 }

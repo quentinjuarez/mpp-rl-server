@@ -16,13 +16,13 @@ export async function createOrUpdate(
   next: NextFunction,
 ) {
   try {
-    const { blue, orange, matchId, eventId, date } = req.body;
+    const { blue, orange, matchSlug, eventSlug, date } = req.body;
 
     if (
       blue === undefined ||
       orange === undefined ||
-      !matchId ||
-      !eventId ||
+      !matchSlug ||
+      !eventSlug ||
       !date
     ) {
       return res.status(400).json({ message: "BAD_REQUEST" }).end();
@@ -30,7 +30,7 @@ export async function createOrUpdate(
 
     const forecast = await req.services
       .forecastService()
-      .createOrUpdate({ blue, orange, matchId, eventId, date });
+      .createOrUpdate({ blue, orange, matchSlug, eventSlug, date });
 
     if (!forecast) throw new Error("NOT_FOUND");
 
@@ -46,11 +46,15 @@ export async function getPoints(
   next: NextFunction,
 ) {
   try {
+    const { event } = req.query;
+
     const forecastService = req.services.forecastService();
 
-    await forecastService.computeForecast();
+    await forecastService.computeAllForecasts();
 
-    const points = await forecastService.getMyPoints();
+    const points = await forecastService.getMyPoints(
+      event as string | undefined,
+    );
 
     return res.status(200).json({ points }).end();
   } catch (err) {
@@ -64,9 +68,11 @@ export async function getForecastsResults(
   next: NextFunction,
 ) {
   try {
+    const { event } = req.query;
+
     const forecasts = await req.services
       .forecastService()
-      .getForecastsResults();
+      .getForecastsResults(event as string | undefined);
 
     return res.status(200).json({ forecasts }).end();
   } catch (err) {

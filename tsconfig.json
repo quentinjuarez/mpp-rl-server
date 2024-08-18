@@ -24,6 +24,6 @@
     "typeRoots": ["./node_modules/@types", "./types"]
   },
   "include": ["src"],
-  "exclude": ["test"],
+  "exclude": ["test", "src/seed"],
   "files": ["./src/index.ts", "./src/types/global.d.ts"]
 }

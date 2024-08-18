@@ -15,17 +15,17 @@ async function getAll(req, res, next) {
 }
 async function createOrUpdate(req, res, next) {
     try {
-        const { blue, orange, matchId, eventId, date } = req.body;
+        const { blue, orange, matchSlug, eventSlug, date } = req.body;
         if (blue === undefined ||
             orange === undefined ||
-            !matchId ||
-            !eventId ||
+            !matchSlug ||
+            !eventSlug ||
             !date) {
             return res.status(400).json({ message: "BAD_REQUEST" }).end();
         }
         const forecast = await req.services
             .forecastService()
-            .createOrUpdate({ blue, orange, matchId, eventId, date });
+            .createOrUpdate({ blue, orange, matchSlug, eventSlug, date });
         if (!forecast)
             throw new Error("NOT_FOUND");
         return res.status(200).json(forecast.toObject()).end();
@@ -36,9 +36,10 @@ async function createOrUpdate(req, res, next) {
 }
 async function getPoints(req, res, next) {
     try {
+        const { event } = req.query;
         const forecastService = req.services.forecastService();
-        await forecastService.computeForecast();
-        const points = await forecastService.getMyPoints();
+        await forecastService.computeAllForecasts();
+        const points = await forecastService.getMyPoints(event);
         return res.status(200).json({ points }).end();
     }
     catch (err) {
@@ -47,9 +48,10 @@ async function getPoints(req, res, next) {
 }
 async function getForecastsResults(req, res, next) {
     try {
+        const { event } = req.query;
         const forecasts = await req.services
             .forecastService()
-            .getForecastsResults();
+            .getForecastsResults(event);
         return res.status(200).json({ forecasts }).end();
     }
     catch (err) {

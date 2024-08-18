@@ -11,8 +11,8 @@ class RLAdapter {
             baseURL: "https://zsr.octane.gg",
         });
     }
-    async getMatch(id) {
-        const response = await this.client.get(`/matches/${id}`);
+    async getMatch(slug) {
+        const response = await this.client.get(`/matches/${slug}`);
         return response.data;
     }
 }

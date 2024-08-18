@@ -68,8 +68,11 @@ async function checkUsername(req, res, next) {
 }
 async function getLeaderboard(req, res, next) {
     try {
+        const { event } = req.query;
         const users = await req.services.userService().getUsers();
-        const points = await req.services.forecastService().getPoints();
+        const points = await req.services
+            .forecastService()
+            .getPoints(event);
         const leaderboard = users.map((user) => ({
             ...user.toObject(),
             points: points[user._id] || 0,
