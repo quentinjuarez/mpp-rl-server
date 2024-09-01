@@ -28,9 +28,25 @@ export async function createOrUpdate(
       return res.status(400).json({ message: "BAD_REQUEST" }).end();
     }
 
-    const forecast = await req.services
-      .forecastService()
-      .createOrUpdate({ blue, orange, matchSlug, eventSlug, date });
+    const service = req.services.forecastService();
+
+    const validation = await service.validateForecast({
+      blue,
+      orange,
+      matchSlug,
+      eventSlug,
+      date,
+    });
+
+    if (!validation) throw new Error("FORBIDDEN");
+
+    const forecast = await service.createOrUpdate({
+      blue,
+      orange,
+      matchSlug,
+      eventSlug,
+      date,
+    });
 
     if (!forecast) throw new Error("NOT_FOUND");
 

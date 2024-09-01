@@ -33,14 +33,47 @@ export class ForecastService {
     }
   }
 
+  async validateForecast(payload: ForecastDTO) {
+    const match = await this.rlAdapter.getMatch(payload.matchSlug);
+
+    if (!match) return false;
+
+    const bestOf = match.format.length;
+    const maxScore = (bestOf % 2) + Math.floor(bestOf / 2);
+
+    if (payload.blue < 0 || payload.orange < 0) {
+      return false;
+    }
+
+    if (payload.blue > maxScore || payload.orange > maxScore) {
+      return false;
+    }
+
+    if (payload.blue === payload.orange) {
+      return false;
+    }
+
+    if (payload.blue !== maxScore && payload.orange !== maxScore) {
+      return false;
+    }
+
+    return true;
+  }
+
   async createOrUpdate(payload: ForecastDTO): Promise<ForecastDocument | null> {
     try {
+      await this.validateForecast(payload);
+
       const existingForecast = await Forecast.findOne({
         userId: this.userId,
         matchSlug: payload.matchSlug,
       });
 
       if (existingForecast) {
+        if (existingForecast.processed) {
+          return null;
+        }
+
         const forecast = await Forecast.findOneAndUpdate(
           { userId: this.userId, matchSlug: payload.matchSlug },
           { ...payload },

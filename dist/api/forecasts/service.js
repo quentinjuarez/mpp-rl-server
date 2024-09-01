@@ -21,13 +21,37 @@ class ForecastService {
             return [];
         }
     }
+    async validateForecast(payload) {
+        const match = await this.rlAdapter.getMatch(payload.matchSlug);
+        if (!match)
+            return false;
+        const bestOf = match.format.length;
+        const maxScore = (bestOf % 2) + Math.floor(bestOf / 2);
+        if (payload.blue < 0 || payload.orange < 0) {
+            return false;
+        }
+        if (payload.blue > maxScore || payload.orange > maxScore) {
+            return false;
+        }
+        if (payload.blue === payload.orange) {
+            return false;
+        }
+        if (payload.blue !== maxScore && payload.orange !== maxScore) {
+            return false;
+        }
+        return true;
+    }
     async createOrUpdate(payload) {
         try {
+            await this.validateForecast(payload);
             const existingForecast = await forecasts_1.Forecast.findOne({
                 userId: this.userId,
                 matchSlug: payload.matchSlug,
             });
             if (existingForecast) {
+                if (existingForecast.processed) {
+                    return null;
+                }
                 const forecast = await forecasts_1.Forecast.findOneAndUpdate({ userId: this.userId, matchSlug: payload.matchSlug }, { ...payload }, { new: true });
                 return forecast;
             }
