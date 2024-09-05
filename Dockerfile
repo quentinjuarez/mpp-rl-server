@@ -1,7 +1,7 @@
 FROM node:16-alpine
 
 # Enable Corepack and prepare Yarn
-RUN corepack enable &&
+RUN corepack enable && \
     corepack prepare yarn@3.5.0 --activate
 
 # Create app directory
