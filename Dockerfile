@@ -1,7 +1,7 @@
-FROM node:16-alpine
+FROM node:18-alpine
 
-RUN corepack enable \
-    && corepack prepare yarn@3.5.0 --activate
+RUN corepack enable &&
+    corepack prepare yarn@3.5.0 --activate
 
 # Create app directory
 WORKDIR /app
@@ -19,6 +19,6 @@ COPY . .
 RUN yarn build
 COPY ./src/assets/favicon.ico ./dist/assets/favicon.ico
 
-EXPOSE 4001
+EXPOSE 3003
 
 CMD [ "node", "dist/index.js" ]
