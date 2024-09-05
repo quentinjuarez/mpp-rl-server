@@ -1,12 +1,10 @@
-FROM node:18-alpine
+FROM node:16-alpine
 
-# Enable and prepare corepack
-RUN npm install -g corepack &&
-    corepack enable &&
+RUN corepack enable &&
     corepack prepare yarn@3.5.0 --activate
 
 # Create app directory
-WORKDIR /app
+WORKDIR /usr/src/mpp-rl-server
 
 # Install app dependencies
 COPY package.json yarn.lock ./
