@@ -17,7 +17,7 @@ RUN yarn install
 COPY . .
 
 RUN yarn build
-COPY ./src/assets/favicon.ico ./dist/assets/favicon.ico
+# COPY ./src/public/favicon.ico ./dist/public/favicon.ico
 
 EXPOSE 3003
 
