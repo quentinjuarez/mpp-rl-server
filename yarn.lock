@@ -6303,6 +6303,7 @@ __metadata:
     pino: 8.14.1
     pino-pretty: ^10.0.0
     prettier: 3.3.3
+    qs: ^6.13.0
     serve-favicon: ^2.5.0
     socket.io: ^4.5.4
     swagger-jsdoc: ^6.2.8
@@ -7014,6 +7015,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"qs@npm:^6.13.0":
+  version: 6.13.0
+  resolution: "qs@npm:6.13.0"
+  dependencies:
+    side-channel: ^1.0.6
+  checksum: e9404dc0fc2849245107108ce9ec2766cde3be1b271de0bf1021d049dc5b98d1a2901e67b431ac5509f865420a7ed80b7acb3980099fe1c118a1c5d2e1432ad8
+  languageName: node
+  linkType: hard
+
 "querystringify@npm:^2.1.1":
   version: 2.2.0
   resolution: "querystringify@npm:2.2.0"
@@ -7403,7 +7413,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"side-channel@npm:^1.0.4":
+"side-channel@npm:^1.0.4, side-channel@npm:^1.0.6":
   version: 1.0.6
   resolution: "side-channel@npm:1.0.6"
   dependencies:

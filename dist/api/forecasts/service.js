@@ -146,25 +146,34 @@ class ForecastService {
             if (!forecasts.length) {
                 return true;
             }
+            const matchIds = [];
             // Group forecasts by matchId
             const forecastsByMatch = forecasts.reduce((acc, forecast) => {
                 if (!acc[forecast.matchId]) {
+                    matchIds.push(forecast.matchId);
                     acc[forecast.matchId] = [];
                 }
                 acc[forecast.matchId].push(forecast);
                 return acc;
             }, {});
-            const uniqueMatchIds = Object.keys(forecastsByMatch).map(parseInt);
-            const matches = (await this.psAdapter.getMatches(uniqueMatchIds));
+            console.log({ matchIds });
+            const matches = (await this.psAdapter.getMatches(matchIds));
+            console.log({ matches });
             // Loop through each matchId group
             for (const matchId of Object.keys(forecastsByMatch)) {
                 const match = matches.find((m) => m.id === parseInt(matchId));
+                if (!match) {
+                    continue;
+                }
                 const hasWinner = !!match.winner_id;
                 if (!hasWinner) {
                     continue; // Skip this match if no winner is determined yet
                 }
-                const blueScore = match.results[0].score;
-                const orangeScore = match.results[1].score;
+                const blueScore = match.results?.[0]?.score;
+                const orangeScore = match.results?.[1]?.score;
+                if (blueScore === undefined || orangeScore === undefined) {
+                    continue;
+                }
                 const blueWins = blueScore > orangeScore;
                 // Process each forecast for the matchId
                 const matchForecasts = forecastsByMatch[parseInt(matchId)];

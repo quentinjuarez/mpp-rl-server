@@ -1,4 +1,5 @@
 import axios from "axios";
+import qs from "qs";
 import type { AxiosInstance } from "axios";
 
 class PandaScoreAdapter {
@@ -10,11 +11,15 @@ class PandaScoreAdapter {
       headers: {
         Authorization: `Bearer ${process.env.PANDASCORE_TOKEN}`,
       },
+      paramsSerializer: (params) => {
+        return qs.stringify(params, { arrayFormat: "comma" });
+      },
     });
   }
 
+  // ?filter[id]=1,2,3
   async getMatches(ids: number[]) {
-    const response = await this.client.get("/", {
+    const response = await this.client.get("/matches", {
       params: {
         filter: {
           id: ids,
@@ -25,7 +30,7 @@ class PandaScoreAdapter {
   }
 
   async getMatch(id: number) {
-    const response = await this.client.get("/", {
+    const response = await this.client.get("/matches", {
       params: {
         filter: {
           id: [id],
