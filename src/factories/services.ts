@@ -5,6 +5,7 @@ import AuthService from "../api/auth/service";
 import UserService from "../api/users/service";
 import ForecastService from "../api/forecasts/service";
 import RLAdapter from "../adapters/rl";
+import PandaScoreAdapter from "../adapters/ps";
 
 class ServicesFactory {
   userId: string;
@@ -15,6 +16,7 @@ class ServicesFactory {
   forecasts?: ForecastService;
 
   rl?: RLAdapter;
+  ps?: PandaScoreAdapter;
 
   constructor(req: Request) {
     this.userId = req.auth?.userId;
@@ -60,6 +62,13 @@ class ServicesFactory {
       this.rl = new RLAdapter();
     }
     return this.rl;
+  }
+
+  psAdapter() {
+    if (!this.ps) {
+      this.ps = new PandaScoreAdapter();
+    }
+    return this.ps;
   }
 }
 

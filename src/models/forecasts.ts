@@ -3,16 +3,16 @@ import mongoose, { Document, Model, Schema } from "mongoose";
 export type ForecastDTO = {
   blue: number;
   orange: number;
-  matchSlug: string;
-  eventSlug: string;
+  matchId: number;
+  tournamentId: number;
   date: string;
 };
 
 export interface ForecastDocument extends Document {
   blue: number;
   orange: number;
-  matchSlug: string;
-  eventSlug: string;
+  matchId: number;
+  tournamentId: number;
   userId: string;
   date: string;
   processed: boolean;
@@ -32,12 +32,12 @@ const ForecastSchema: Schema<ForecastDocument> = new Schema(
       type: Number,
       required: true,
     },
-    matchSlug: {
-      type: String,
+    matchId: {
+      type: Number,
       required: true,
     },
-    eventSlug: {
-      type: String,
+    tournamentId: {
+      type: Number,
       required: true,
     },
     userId: {
@@ -67,7 +67,7 @@ const ForecastSchema: Schema<ForecastDocument> = new Schema(
   { collection: "forecasts", timestamps: true },
 );
 
-ForecastSchema.index({ userId: 1, matchSlug: 1 }, { unique: true });
+ForecastSchema.index({ userId: 1, matchId: 1 }, { unique: true });
 
 export const Forecast: Model<ForecastDocument> =
   mongoose.model<ForecastDocument>("Forecast", ForecastSchema);

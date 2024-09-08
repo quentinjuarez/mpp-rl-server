@@ -16,13 +16,13 @@ export async function createOrUpdate(
   next: NextFunction,
 ) {
   try {
-    const { blue, orange, matchSlug, eventSlug, date } = req.body;
+    const { blue, orange, matchId, tournamentId, date } = req.body;
 
     if (
       blue === undefined ||
       orange === undefined ||
-      !matchSlug ||
-      !eventSlug ||
+      !matchId ||
+      !tournamentId ||
       !date
     ) {
       return res.status(400).json({ message: "BAD_REQUEST" }).end();
@@ -33,8 +33,8 @@ export async function createOrUpdate(
     const validation = await service.validateForecast({
       blue,
       orange,
-      matchSlug,
-      eventSlug,
+      matchId,
+      tournamentId,
       date,
     });
 
@@ -43,8 +43,8 @@ export async function createOrUpdate(
     const forecast = await service.createOrUpdate({
       blue,
       orange,
-      matchSlug,
-      eventSlug,
+      matchId,
+      tournamentId,
       date,
     });
 

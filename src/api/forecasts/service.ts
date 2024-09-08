@@ -34,7 +34,7 @@ export class ForecastService {
   }
 
   async validateForecast(payload: ForecastDTO) {
-    const match = await this.rlAdapter.getMatch(payload.matchSlug);
+    const match = await this.rlAdapter.getMatch(payload.matchId);
 
     if (!match) return false;
 
@@ -66,7 +66,7 @@ export class ForecastService {
 
       const existingForecast = await Forecast.findOne({
         userId: this.userId,
-        matchSlug: payload.matchSlug,
+        matchId: payload.matchId,
       });
 
       if (existingForecast) {
@@ -75,7 +75,7 @@ export class ForecastService {
         }
 
         const forecast = await Forecast.findOneAndUpdate(
-          { userId: this.userId, matchSlug: payload.matchSlug },
+          { userId: this.userId, matchId: payload.matchId },
           { ...payload },
           { new: true },
         );
@@ -95,14 +95,17 @@ export class ForecastService {
     }
   }
 
-  async getPointsByUser(userId: string, eventSlug?: string): Promise<number> {
+  async getPointsByUser(
+    userId: string,
+    tournamentId?: string,
+  ): Promise<number> {
     try {
       const res = await Forecast.aggregate([
         {
           $match: {
             userId: String(userId),
             processed: true,
-            ...(eventSlug ? { eventSlug } : {}),
+            ...(tournamentId ? { tournamentId } : {}),
           },
         },
         {
@@ -130,14 +133,21 @@ export class ForecastService {
     }
   }
 
-  async getMyPoints(eventSlug?: string): Promise<number> {
-    return this.getPointsByUser(this.userId, eventSlug);
+  async getMyPoints(tournamentId?: string): Promise<number> {
+    return this.getPointsByUser(this.userId, tournamentId);
   }
 
-  async getPoints(eventSlug?: string): Promise<{ [userId: string]: number }> {
+  async getPoints(
+    tournamentId?: string,
+  ): Promise<{ [userId: string]: number }> {
     try {
       const points = await Forecast.aggregate([
-        { $match: { processed: true, ...(eventSlug ? { eventSlug } : {}) } },
+        {
+          $match: {
+            processed: true,
+            ...(tournamentId ? { tournamentId } : {}),
+          },
+        },
         {
           $group: {
             _id: "$userId",
@@ -175,7 +185,7 @@ export class ForecastService {
       });
 
       for (const forecast of forecasts) {
-        const match = await this.rlAdapter.getMatch(forecast.matchSlug);
+        const match = await this.rlAdapter.getMatch(forecast.matchId);
 
         const hasWinner = match.blue.winner || match.orange.winner;
 
@@ -208,24 +218,24 @@ export class ForecastService {
 
   async computeAllForecasts(): Promise<boolean> {
     try {
-      // Fetch all unprocessed forecasts grouped by matchSlug
+      // Fetch all unprocessed forecasts grouped by matchId
       const forecasts = await Forecast.find({ processed: false });
 
-      // Group forecasts by matchSlug
+      // Group forecasts by matchId
       const forecastsByMatch = forecasts.reduce(
         (acc, forecast) => {
-          if (!acc[forecast.matchSlug]) {
-            acc[forecast.matchSlug] = [];
+          if (!acc[forecast.matchId]) {
+            acc[forecast.matchId] = [];
           }
-          acc[forecast.matchSlug].push(forecast);
+          acc[forecast.matchId].push(forecast);
           return acc;
         },
         {} as Record<string, ForecastDocument[]>,
       );
 
-      // Loop through each matchSlug group
-      for (const matchSlug of Object.keys(forecastsByMatch)) {
-        const match = await this.rlAdapter.getMatch(matchSlug);
+      // Loop through each matchId group
+      for (const matchId of Object.keys(forecastsByMatch)) {
+        const match = await this.rlAdapter.getMatch(matchId);
         const hasWinner = match.blue.winner || match.orange.winner;
 
         if (!hasWinner) {
@@ -236,8 +246,8 @@ export class ForecastService {
         const orangeScore = match.orange.score;
         const blueWins = blueScore > orangeScore;
 
-        // Process each forecast for the matchSlug
-        const matchForecasts = forecastsByMatch[matchSlug];
+        // Process each forecast for the matchId
+        const matchForecasts = forecastsByMatch[matchId];
         for (const forecast of matchForecasts) {
           const forecastBlueWins = forecast.blue > forecast.orange;
           const correct = blueWins === forecastBlueWins;
@@ -260,19 +270,19 @@ export class ForecastService {
   }
 
   async getForecastsResults(
-    eventSlug?: string,
+    tournamentId?: string,
   ): Promise<Record<string, ForecastDocument>> {
     try {
       const res = await Forecast.aggregate([
         {
           $match: {
             userId: this.userId,
-            ...(eventSlug ? { eventSlug } : {}),
+            ...(tournamentId ? { tournamentId } : {}),
           },
         },
         {
           $group: {
-            _id: "$matchSlug",
+            _id: "$matchId",
             forecasts: {
               $push: "$$ROOT",
             },
