@@ -34,12 +34,16 @@ const ForecastSchema = new mongoose_1.Schema({
         type: Number,
         required: true,
     },
-    matchSlug: {
-        type: String,
+    matchId: {
+        type: Number,
         required: true,
     },
-    eventSlug: {
-        type: String,
+    tournamentId: {
+        type: Number,
+        required: true,
+    },
+    serieId: {
+        type: Number,
         required: true,
     },
     userId: {
@@ -66,5 +70,5 @@ const ForecastSchema = new mongoose_1.Schema({
         default: false,
     },
 }, { collection: "forecasts", timestamps: true });
-ForecastSchema.index({ userId: 1, matchSlug: 1 }, { unique: true });
+ForecastSchema.index({ userId: 1, matchId: 1 }, { unique: true });
 exports.Forecast = mongoose_1.default.model("Forecast", ForecastSchema);

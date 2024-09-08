@@ -12,9 +12,11 @@ class RLAdapter {
             baseURL: "https://api.slokh.gg",
         });
     }
+    // @ts-expect-error - Test
     async getMatch(slug) {
-        const response = await this.client.get(`/matches/${slug}`);
-        return response.data;
+        return null;
+        // const response = await this.client.get(`/matches/${slug}`);
+        // return response.data;
     }
 }
 exports.default = RLAdapter;
