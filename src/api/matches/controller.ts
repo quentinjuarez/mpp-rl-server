@@ -2,15 +2,15 @@ import { Request, Response, NextFunction } from "express";
 
 export async function getPast(req: Request, res: Response, next: NextFunction) {
   try {
-    const { tournamentId } = req.query;
+    const { serie_id } = req.query;
 
-    if (!tournamentId) {
+    if (!serie_id) {
       throw new Error("BAD_REQUEST");
     }
 
     const matches = await req.services
       .psAdapter()
-      .getPastMatches(parseInt(tournamentId as string));
+      .getPastMatches(parseInt(serie_id as string));
 
     return res.status(200).json({ matches }).end();
   } catch (err) {
@@ -24,15 +24,15 @@ export async function getUpcoming(
   next: NextFunction,
 ) {
   try {
-    const { tournamentId } = req.query;
+    const { serie_id } = req.query;
 
-    if (!tournamentId) {
+    if (!serie_id) {
       throw new Error("BAD_REQUEST");
     }
 
     const matches = await req.services
       .psAdapter()
-      .getUpcomingMatches(parseInt(tournamentId as string));
+      .getUpcomingMatches(parseInt(serie_id as string));
 
     return res.status(200).json({ matches }).end();
   } catch (err) {

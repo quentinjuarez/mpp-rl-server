@@ -1,25 +1,25 @@
 import type { Logger } from "pino";
 import { Forecast } from "../../models/forecasts";
 import type { ForecastDocument, ForecastDTO } from "../../models/forecasts";
-import RLAdapter from "../../adapters/rl";
+import type PandaScoreAdapter from "../../adapters/ps";
 
 export class ForecastService {
   private logger: Logger;
   private userId: string;
-  private rlAdapter: RLAdapter;
+  private psAdapter: PandaScoreAdapter;
 
   constructor({
     logger,
     userId,
-    rlAdapter,
+    psAdapter,
   }: {
     logger: Logger;
     userId: string;
-    rlAdapter: RLAdapter;
+    psAdapter: PandaScoreAdapter;
   }) {
     this.logger = logger;
     this.userId = userId;
-    this.rlAdapter = rlAdapter;
+    this.psAdapter = psAdapter;
   }
 
   async getAll(): Promise<ForecastDocument[]> {
@@ -34,7 +34,7 @@ export class ForecastService {
   }
 
   async validateForecast(payload: ForecastDTO) {
-    const match = await this.rlAdapter.getMatch(payload.matchId);
+    const match = await this.psAdapter.getMatch(payload.matchId);
 
     if (!match) return false;
 
@@ -62,8 +62,6 @@ export class ForecastService {
 
   async createOrUpdate(payload: ForecastDTO): Promise<ForecastDocument | null> {
     try {
-      await this.validateForecast(payload);
-
       const existingForecast = await Forecast.findOne({
         userId: this.userId,
         matchId: payload.matchId,
@@ -95,17 +93,14 @@ export class ForecastService {
     }
   }
 
-  async getPointsByUser(
-    userId: string,
-    tournamentId?: string,
-  ): Promise<number> {
+  async getPointsByUser(userId: string, serieId?: string): Promise<number> {
     try {
       const res = await Forecast.aggregate([
         {
           $match: {
             userId: String(userId),
             processed: true,
-            ...(tournamentId ? { tournamentId } : {}),
+            ...(serieId ? { serieId: parseInt(serieId) } : {}),
           },
         },
         {
@@ -133,19 +128,17 @@ export class ForecastService {
     }
   }
 
-  async getMyPoints(tournamentId?: string): Promise<number> {
-    return this.getPointsByUser(this.userId, tournamentId);
+  async getMyPoints(serieId?: string): Promise<number> {
+    return this.getPointsByUser(this.userId, serieId);
   }
 
-  async getPoints(
-    tournamentId?: string,
-  ): Promise<{ [userId: string]: number }> {
+  async getPoints(serieId?: string): Promise<{ [userId: string]: number }> {
     try {
       const points = await Forecast.aggregate([
         {
           $match: {
             processed: true,
-            ...(tournamentId ? { tournamentId } : {}),
+            ...(serieId ? { serieId: parseInt(serieId) } : {}),
           },
         },
         {
@@ -177,45 +170,6 @@ export class ForecastService {
     }
   }
 
-  async computeMyForecasts(): Promise<boolean> {
-    try {
-      const forecasts = await Forecast.find({
-        userId: this.userId,
-        processed: false,
-      });
-
-      for (const forecast of forecasts) {
-        const match = await this.rlAdapter.getMatch(forecast.matchId);
-
-        const hasWinner = match.blue.winner || match.orange.winner;
-
-        if (!hasWinner) {
-          continue;
-        }
-
-        const blueScore = match.blue.score;
-        const orangeScore = match.orange.score;
-
-        const blueWins = blueScore > orangeScore;
-        const forecastBlueWins = forecast.blue > forecast.orange;
-
-        const correct = blueWins === forecastBlueWins;
-        const exact =
-          blueScore === forecast.blue && orangeScore === forecast.orange;
-
-        await Forecast.updateOne(
-          { _id: forecast._id },
-          { $set: { correct, exact, processed: true } },
-        );
-      }
-
-      return true;
-    } catch (err) {
-      this.logger.error(err);
-      return false;
-    }
-  }
-
   async computeAllForecasts(): Promise<boolean> {
     try {
       // Fetch all unprocessed forecasts grouped by matchId
@@ -230,24 +184,30 @@ export class ForecastService {
           acc[forecast.matchId].push(forecast);
           return acc;
         },
-        {} as Record<string, ForecastDocument[]>,
+        {} as Record<number, ForecastDocument[]>,
       );
+
+      const uniqueMatchIds = Object.keys(forecastsByMatch).map(parseInt);
+
+      const matches = (await this.psAdapter.getMatches(
+        uniqueMatchIds,
+      )) as any[];
 
       // Loop through each matchId group
       for (const matchId of Object.keys(forecastsByMatch)) {
-        const match = await this.rlAdapter.getMatch(matchId);
-        const hasWinner = match.blue.winner || match.orange.winner;
+        const match = matches.find((m) => m.id === parseInt(matchId));
+        const hasWinner = !!match.winner_id;
 
         if (!hasWinner) {
           continue; // Skip this match if no winner is determined yet
         }
 
-        const blueScore = match.blue.score;
-        const orangeScore = match.orange.score;
+        const blueScore = match.results[0].score;
+        const orangeScore = match.results[1].score;
         const blueWins = blueScore > orangeScore;
 
         // Process each forecast for the matchId
-        const matchForecasts = forecastsByMatch[matchId];
+        const matchForecasts = forecastsByMatch[parseInt(matchId)];
         for (const forecast of matchForecasts) {
           const forecastBlueWins = forecast.blue > forecast.orange;
           const correct = blueWins === forecastBlueWins;
@@ -266,37 +226,6 @@ export class ForecastService {
     } catch (err) {
       this.logger.error(err);
       return false;
-    }
-  }
-
-  async getForecastsResults(
-    tournamentId?: string,
-  ): Promise<Record<string, ForecastDocument>> {
-    try {
-      const res = await Forecast.aggregate([
-        {
-          $match: {
-            userId: this.userId,
-            ...(tournamentId ? { tournamentId } : {}),
-          },
-        },
-        {
-          $group: {
-            _id: "$matchId",
-            forecasts: {
-              $push: "$$ROOT",
-            },
-          },
-        },
-      ]);
-
-      return res.reduce((acc, { _id, forecasts }) => {
-        acc[_id] = forecasts[0];
-        return acc;
-      }, {});
-    } catch (error) {
-      this.logger.error(error);
-      return {};
     }
   }
 }

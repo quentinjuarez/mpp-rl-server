@@ -51,7 +51,7 @@ class ServicesFactory {
       this.forecasts = new ForecastService({
         logger: this.logger.child({ service: "ForecastService" }),
         userId: this.userId,
-        rlAdapter: this.rlAdapter(),
+        psAdapter: this.psAdapter(),
       });
     }
     return this.forecasts;

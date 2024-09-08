@@ -14,7 +14,7 @@ class PandaScoreAdapter {
   }
 
   async getMatches(ids: number[]) {
-    const response = await this.client.get("/matches", {
+    const response = await this.client.get("/", {
       params: {
         id: ids,
       },
@@ -22,19 +22,33 @@ class PandaScoreAdapter {
     return response.data;
   }
 
-  async getUpcomingMatches(tournamentId: number) {
+  async getMatch(id: number) {
+    const response = await this.client.get("/", {
+      params: {
+        id: [id],
+      },
+    });
+    return response.data?.[0];
+  }
+
+  // ?filter[serieId]=serie_id
+  async getUpcomingMatches(serie_id: number) {
     const response = await this.client.get("/matches/upcoming", {
       params: {
-        tournament_id: tournamentId,
+        filter: {
+          serie_id,
+        },
       },
     });
     return response.data;
   }
 
-  async getPastMatches(tournamentId: number) {
+  async getPastMatches(serie_id: number) {
     const response = await this.client.get("/matches/past", {
       params: {
-        tournament_id: tournamentId,
+        filter: {
+          serie_id,
+        },
       },
     });
     return response.data;

@@ -16,13 +16,14 @@ export async function createOrUpdate(
   next: NextFunction,
 ) {
   try {
-    const { blue, orange, matchId, tournamentId, date } = req.body;
+    const { blue, orange, matchId, serieId, tournamentId, date } = req.body;
 
     if (
       blue === undefined ||
       orange === undefined ||
       !matchId ||
       !tournamentId ||
+      !serieId ||
       !date
     ) {
       return res.status(400).json({ message: "BAD_REQUEST" }).end();
@@ -30,21 +31,23 @@ export async function createOrUpdate(
 
     const service = req.services.forecastService();
 
-    const validation = await service.validateForecast({
-      blue,
-      orange,
-      matchId,
-      tournamentId,
-      date,
-    });
+    // const validation = await service.validateForecast({
+    //   blue,
+    //   orange,
+    //   matchId,
+    //   serieId,
+    //   tournamentId,
+    //   date,
+    // });
 
-    if (!validation) throw new Error("FORBIDDEN");
+    // if (!validation) throw new Error("FORBIDDEN");
 
     const forecast = await service.createOrUpdate({
       blue,
       orange,
       matchId,
       tournamentId,
+      serieId,
       date,
     });
 
@@ -62,35 +65,17 @@ export async function getPoints(
   next: NextFunction,
 ) {
   try {
-    const { event } = req.query;
+    const { serieId } = req.query;
 
     const forecastService = req.services.forecastService();
 
     await forecastService.computeAllForecasts();
 
     const points = await forecastService.getMyPoints(
-      event as string | undefined,
+      serieId as string | undefined,
     );
 
     return res.status(200).json({ points }).end();
-  } catch (err) {
-    return next(err);
-  }
-}
-
-export async function getForecastsResults(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
-  try {
-    const { event } = req.query;
-
-    const forecasts = await req.services
-      .forecastService()
-      .getForecastsResults(event as string | undefined);
-
-    return res.status(200).json({ forecasts }).end();
   } catch (err) {
     return next(err);
   }

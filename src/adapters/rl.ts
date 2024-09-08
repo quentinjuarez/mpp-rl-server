@@ -11,9 +11,11 @@ class RLAdapter {
     });
   }
 
-  async getMatch(slug: string) {
-    const response = await this.client.get(`/matches/${slug}`);
-    return response.data;
+  // @ts-expect-error - Test
+  async getMatch(slug: any) {
+    return null as unknown as any;
+    // const response = await this.client.get(`/matches/${slug}`);
+    // return response.data;
   }
 }
 

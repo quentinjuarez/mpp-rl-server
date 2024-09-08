@@ -5,6 +5,7 @@ export type ForecastDTO = {
   orange: number;
   matchId: number;
   tournamentId: number;
+  serieId: number;
   date: string;
 };
 
@@ -13,6 +14,7 @@ export interface ForecastDocument extends Document {
   orange: number;
   matchId: number;
   tournamentId: number;
+  serieId: number;
   userId: string;
   date: string;
   processed: boolean;
@@ -37,6 +39,10 @@ const ForecastSchema: Schema<ForecastDocument> = new Schema(
       required: true,
     },
     tournamentId: {
+      type: Number,
+      required: true,
+    },
+    serieId: {
       type: Number,
       required: true,
     },
