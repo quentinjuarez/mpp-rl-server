@@ -16,7 +16,9 @@ class PandaScoreAdapter {
   async getMatches(ids: number[]) {
     const response = await this.client.get("/", {
       params: {
-        id: ids,
+        filter: {
+          id: ids,
+        },
       },
     });
     return response.data;
@@ -25,7 +27,9 @@ class PandaScoreAdapter {
   async getMatch(id: number) {
     const response = await this.client.get("/", {
       params: {
-        id: [id],
+        filter: {
+          id: [id],
+        },
       },
     });
     return response.data?.[0];

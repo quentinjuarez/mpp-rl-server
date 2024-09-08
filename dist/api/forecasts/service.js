@@ -143,6 +143,9 @@ class ForecastService {
         try {
             // Fetch all unprocessed forecasts grouped by matchId
             const forecasts = await forecasts_1.Forecast.find({ processed: false });
+            if (!forecasts.length) {
+                return true;
+            }
             // Group forecasts by matchId
             const forecastsByMatch = forecasts.reduce((acc, forecast) => {
                 if (!acc[forecast.matchId]) {

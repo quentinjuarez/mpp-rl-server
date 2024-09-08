@@ -175,6 +175,10 @@ export class ForecastService {
       // Fetch all unprocessed forecasts grouped by matchId
       const forecasts = await Forecast.find({ processed: false });
 
+      if (!forecasts.length) {
+        return true;
+      }
+
       // Group forecasts by matchId
       const forecastsByMatch = forecasts.reduce(
         (acc, forecast) => {
