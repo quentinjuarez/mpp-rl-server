@@ -19,7 +19,7 @@ class PandaScoreAdapter {
 
   // ?filter[id]=1,2,3
   async getMatches(ids: number[]) {
-    const response = await this.client.get("/matches", {
+    const response = await this.client.get<PSMatch[]>("/matches", {
       params: {
         filter: {
           id: ids,
@@ -30,7 +30,7 @@ class PandaScoreAdapter {
   }
 
   async getMatch(id: number) {
-    const response = await this.client.get("/matches", {
+    const response = await this.client.get<PSMatch[]>("/matches", {
       params: {
         filter: {
           id: [id],
@@ -42,7 +42,7 @@ class PandaScoreAdapter {
 
   // ?filter[serieId]=serie_id
   async getUpcomingMatches(serie_id: number) {
-    const response = await this.client.get("/matches/upcoming", {
+    const response = await this.client.get<PSMatch[]>("/matches/upcoming", {
       params: {
         filter: {
           serie_id,
@@ -53,7 +53,7 @@ class PandaScoreAdapter {
   }
 
   async getPastMatches(serie_id: number) {
-    const response = await this.client.get("/matches/past", {
+    const response = await this.client.get<PSMatch[]>("/matches/past", {
       params: {
         filter: {
           serie_id,

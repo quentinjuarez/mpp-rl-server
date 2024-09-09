@@ -91,13 +91,13 @@ async function getUser(req, res, next) {
         const user = await req.services.userService().getUser(username);
         if (!user)
             throw new Error("NOT_FOUND");
-        const points = await req.services
-            .forecastService()
-            .getPointsByUser(user._id);
-        const otherFields = user.toObject();
-        otherFields.points = points;
-        delete otherFields.password;
-        return res.status(200).json(otherFields).end();
+        const forecastService = req.services.forecastService();
+        const points = await forecastService.getPointsByUser(user._id);
+        const forecasts = await forecastService.getByUser(user._id, true);
+        const userFields = user.toObject();
+        userFields.points = points;
+        userFields.forecasts = forecasts;
+        return res.status(200).json(userFields).end();
     }
     catch (err) {
         return next(err);

@@ -21,11 +21,36 @@ class ForecastService {
             return [];
         }
     }
+    async getByUser(userId, enriched) {
+        try {
+            const forecasts = await forecasts_1.Forecast.find({
+                userId,
+                date: { $gt: new Date() },
+            });
+            if (enriched) {
+                const matchIds = forecasts.map((f) => f.matchId);
+                const matches = await this.psAdapter.getMatches(matchIds);
+                const test = forecasts.map((forecast) => {
+                    const match = matches.find((m) => m.id === forecast.matchId);
+                    return {
+                        ...forecast.toObject(),
+                        match,
+                    };
+                });
+                return test;
+            }
+            return forecasts;
+        }
+        catch (err) {
+            this.logger.error(err);
+            return [];
+        }
+    }
     async validateForecast(payload) {
         const match = await this.psAdapter.getMatch(payload.matchId);
         if (!match)
             return false;
-        const bestOf = match.format.length;
+        const bestOf = match.number_of_games;
         const maxScore = (bestOf % 2) + Math.floor(bestOf / 2);
         if (payload.blue < 0 || payload.orange < 0) {
             return false;
@@ -156,9 +181,7 @@ class ForecastService {
                 acc[forecast.matchId].push(forecast);
                 return acc;
             }, {});
-            console.log({ matchIds });
-            const matches = (await this.psAdapter.getMatches(matchIds));
-            console.log({ matches });
+            const matches = await this.psAdapter.getMatches(matchIds);
             // Loop through each matchId group
             for (const matchId of Object.keys(forecastsByMatch)) {
                 const match = matches.find((m) => m.id === parseInt(matchId));

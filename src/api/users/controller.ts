@@ -115,15 +115,17 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
 
     if (!user) throw new Error("NOT_FOUND");
 
-    const points = await req.services
-      .forecastService()
-      .getPointsByUser(user._id);
+    const forecastService = req.services.forecastService();
 
-    const otherFields = user.toObject();
-    otherFields.points = points;
-    delete otherFields.password;
+    const points = await forecastService.getPointsByUser(user._id);
 
-    return res.status(200).json(otherFields).end();
+    const forecasts = await forecastService.getByUser(user._id, true);
+
+    const userFields = user.toObject();
+    userFields.points = points;
+    userFields.forecasts = forecasts;
+
+    return res.status(200).json(userFields).end();
   } catch (err) {
     return next(err);
   }
