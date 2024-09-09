@@ -215,6 +215,16 @@ class ForecastService {
             return false;
         }
     }
+    async getByMatchId(matchId) {
+        try {
+            const forecasts = await forecasts_1.Forecast.find({ matchId });
+            return forecasts;
+        }
+        catch (err) {
+            this.logger.error(err);
+            return [];
+        }
+    }
 }
 exports.ForecastService = ForecastService;
 exports.default = ForecastService;

@@ -112,6 +112,19 @@ export class UserService {
       return null;
     }
   }
+
+  async getByIds(ids: string[]): Promise<UserDocument[]> {
+    try {
+      const users = await User.find({ _id: { $in: ids } }).select(
+        "_id username",
+      );
+
+      return users;
+    } catch (err) {
+      this.logger.error(err);
+      return [];
+    }
+  }
 }
 
 export default UserService;

@@ -80,3 +80,39 @@ export async function getPoints(
     return next(err);
   }
 }
+
+export async function getByMatchId(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { matchId } = req.params;
+
+    const forecasts = await req.services
+      .forecastService()
+      .getByMatchId(parseInt(matchId));
+
+    const userIds = forecasts.map((f) => f.userId);
+
+    const users = await req.services.userService().getByIds(userIds);
+
+    const usersWithForecast = forecasts.map((f) => {
+      const user = users.find((u) => String(u._id) === String(f.userId));
+
+      return {
+        ...f.toObject(),
+        username: user?.username,
+      };
+    });
+
+    return res
+      .status(200)
+      .json({
+        forecasts: usersWithForecast,
+      })
+      .end();
+  } catch (err) {
+    return next(err);
+  }
+}

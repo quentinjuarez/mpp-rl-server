@@ -271,6 +271,17 @@ export class ForecastService {
       return false;
     }
   }
+
+  async getByMatchId(matchId: number): Promise<ForecastDocument[]> {
+    try {
+      const forecasts = await Forecast.find({ matchId });
+
+      return forecasts;
+    } catch (err) {
+      this.logger.error(err);
+      return [];
+    }
+  }
 }
 
 export default ForecastService;

@@ -94,6 +94,16 @@ class UserService {
             return null;
         }
     }
+    async getByIds(ids) {
+        try {
+            const users = await users_1.User.find({ _id: { $in: ids } }).select("_id username");
+            return users;
+        }
+        catch (err) {
+            this.logger.error(err);
+            return [];
+        }
+    }
 }
 exports.UserService = UserService;
 exports.default = UserService;

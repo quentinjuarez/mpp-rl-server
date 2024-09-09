@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAll = getAll;
 exports.createOrUpdate = createOrUpdate;
 exports.getPoints = getPoints;
+exports.getByMatchId = getByMatchId;
 async function getAll(req, res, next) {
     try {
         const forecasts = await req.services.forecastService().getAll();
@@ -56,6 +57,32 @@ async function getPoints(req, res, next) {
         await forecastService.computeAllForecasts();
         const points = await forecastService.getMyPoints(serieId);
         return res.status(200).json({ points }).end();
+    }
+    catch (err) {
+        return next(err);
+    }
+}
+async function getByMatchId(req, res, next) {
+    try {
+        const { matchId } = req.params;
+        const forecasts = await req.services
+            .forecastService()
+            .getByMatchId(parseInt(matchId));
+        const userIds = forecasts.map((f) => f.userId);
+        const users = await req.services.userService().getByIds(userIds);
+        const usersWithForecast = forecasts.map((f) => {
+            const user = users.find((u) => String(u._id) === String(f.userId));
+            return {
+                ...f.toObject(),
+                username: user?.username,
+            };
+        });
+        return res
+            .status(200)
+            .json({
+            forecasts: usersWithForecast,
+        })
+            .end();
     }
     catch (err) {
         return next(err);
