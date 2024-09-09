@@ -100,8 +100,15 @@ export async function getByMatchId(
     const usersWithForecast = forecasts.map((f) => {
       const user = users.find((u) => String(u._id) === String(f.userId));
 
+      const forecastObj = f.toObject();
+
+      const showScore =
+        req.auth.userId === f.userId || forecastObj.date < new Date();
+
       return {
         ...f.toObject(),
+        blue: showScore ? forecastObj.blue : "-",
+        orange: showScore ? forecastObj.orange : "-",
         username: user?.username,
       };
     });
