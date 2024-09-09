@@ -25,15 +25,19 @@ class ForecastService {
         try {
             const forecasts = await forecasts_1.Forecast.find({
                 userId,
-                date: { $gt: new Date() },
             });
             if (enriched) {
                 const matchIds = forecasts.map((f) => f.matchId);
                 const matches = await this.psAdapter.getMatches(matchIds);
                 const test = forecasts.map((forecast) => {
                     const match = matches.find((m) => m.id === forecast.matchId);
+                    const forecastObj = forecast.toObject();
+                    const showScore = String(this.userId) === String(userId) ||
+                        forecastObj.date < new Date();
                     return {
-                        ...forecast.toObject(),
+                        ...forecastObj,
+                        blue: showScore ? forecastObj.blue : -1,
+                        orange: showScore ? forecastObj.orange : -1,
                         match,
                     };
                 });

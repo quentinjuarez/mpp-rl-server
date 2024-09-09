@@ -40,7 +40,6 @@ export class ForecastService {
     try {
       const forecasts = await Forecast.find({
         userId,
-        date: { $gt: new Date() },
       });
 
       if (enriched) {
@@ -49,8 +48,17 @@ export class ForecastService {
 
         const test = forecasts.map((forecast) => {
           const match = matches.find((m) => m.id === forecast.matchId);
+
+          const forecastObj = forecast.toObject();
+
+          const showScore =
+            String(this.userId) === String(userId) ||
+            forecastObj.date < new Date();
+
           return {
-            ...forecast.toObject(),
+            ...forecastObj,
+            blue: showScore ? forecastObj.blue : -1,
+            orange: showScore ? forecastObj.orange : -1,
             match,
           } as ForecastDocument & { match?: PSMatch };
         });
