@@ -60,5 +60,9 @@ class PandaScoreAdapter {
         });
         return response.data;
     }
+    async getRunningSeries() {
+        const response = await this.client.get("/series/running");
+        return response.data;
+    }
 }
 exports.default = PandaScoreAdapter;
