@@ -4,6 +4,7 @@ import userRoutes from "./users/routes";
 import forecastRoutes from "./forecasts/routes";
 import proxyRoutes from "./proxy/routes";
 import matchRoutes from "./matches/routes";
+import serieRoutes from "./series/routes";
 
 const apiRouter = express.Router();
 
@@ -12,5 +13,6 @@ apiRouter.use("/users", userRoutes);
 apiRouter.use("/forecasts", forecastRoutes);
 apiRouter.use("/proxy", proxyRoutes);
 apiRouter.use("/matches", matchRoutes);
+apiRouter.use("/series", serieRoutes);
 
 export default apiRouter;

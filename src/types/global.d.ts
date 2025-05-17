@@ -53,6 +53,61 @@ declare global {
     tournament_id: number;
   }
 
+  interface PSSerie {
+    id: number;
+    name: string;
+    year: number;
+    begin_at: Date;
+    end_at: Date;
+    winner_id: null;
+    winner_type: string;
+    slug: string;
+    videogame: PSVideogame;
+    modified_at: Date;
+    league_id: number;
+    league: PSLeague;
+    tournaments: PSTournament[];
+    season: null;
+    videogame_title: null;
+    full_name: string;
+  }
+
+  interface PSLeague {
+    id: number;
+    name: string;
+    url: string;
+    slug: string;
+    modified_at: Date;
+    image_url: string;
+  }
+
+  interface PSTournament {
+    id: number;
+    name: string;
+    type: string;
+    country: null;
+    begin_at: Date;
+    detailed_stats: boolean;
+    end_at: Date;
+    winner_id: null;
+    winner_type: string;
+    slug: string;
+    modified_at: Date;
+    league_id: number;
+    serie_id: number;
+    prizepool: null | string;
+    tier: string;
+    has_bracket: boolean;
+    region: string;
+    live_supported: boolean;
+  }
+
+  interface PSVideogame {
+    id: number;
+    name: string;
+    slug: string;
+  }
+
   interface PSGame {
     begin_at: null;
     complete: boolean;

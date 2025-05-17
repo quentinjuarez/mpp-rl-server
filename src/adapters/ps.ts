@@ -62,6 +62,11 @@ class PandaScoreAdapter {
     });
     return response.data;
   }
+
+  async getRunningSeries() {
+    const response = await this.client.get<PSSerie[]>("/series/running");
+    return response.data;
+  }
 }
 
 export default PandaScoreAdapter;
