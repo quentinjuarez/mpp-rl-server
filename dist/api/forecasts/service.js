@@ -28,7 +28,9 @@ class ForecastService {
             });
             if (enriched) {
                 const matchIds = forecasts.map((f) => f.matchId);
-                const matches = await this.psAdapter.getMatches(matchIds);
+                const matches = await this.psAdapter.getMatches({
+                    ids: matchIds,
+                });
                 const test = forecasts.map((forecast) => {
                     const match = matches.find((m) => m.id === forecast.matchId);
                     const forecastObj = forecast.toObject();
@@ -185,7 +187,9 @@ class ForecastService {
                 acc[forecast.matchId].push(forecast);
                 return acc;
             }, {});
-            const matches = await this.psAdapter.getMatches(matchIds);
+            const matches = await this.psAdapter.getMatches({
+                ids: matchIds,
+            });
             // Loop through each matchId group
             for (const matchId of Object.keys(forecastsByMatch)) {
                 const match = matches.find((m) => m.id === parseInt(matchId));
