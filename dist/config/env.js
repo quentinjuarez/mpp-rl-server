@@ -17,6 +17,7 @@ exports.requiredEnvVariables = [
     "GOOGLE_CLIENT_ID",
     "GOOGLE_CLIENT_SECRET",
     "GOOGLE_REDIRECT_URI",
+    "PANDASCORE_TOKEN",
 ];
 const checkEnvVariables = () => {
     let failed = false;

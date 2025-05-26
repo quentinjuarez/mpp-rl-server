@@ -79,5 +79,28 @@ class PandaScoreAdapter {
         const response = await this.client.get("/series/running");
         return response.data;
     }
+    async getUpcomingSeries() {
+        const response = await this.client.get("/series/upcoming");
+        return response.data;
+    }
+    async getPastSeries() {
+        const response = await this.client.get("/series/past");
+        return response.data;
+    }
+    async getAllSeries(filter = {}) {
+        const parsedFilter = {};
+        if (filter.year) {
+            parsedFilter.year = filter.year;
+        }
+        if (filter.ids) {
+            parsedFilter.id = filter.ids;
+        }
+        const response = await this.client.get("/series", {
+            params: {
+                filter: parsedFilter,
+            },
+        });
+        return response.data;
+    }
 }
 exports.default = PandaScoreAdapter;
