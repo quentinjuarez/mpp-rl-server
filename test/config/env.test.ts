@@ -46,6 +46,7 @@ describe("checkEnvVariables", () => {
       "GOOGLE_CLIENT_ID",
       "GOOGLE_CLIENT_SECRET",
       "GOOGLE_REDIRECT_URI",
+      "PANDASCORE_TOKEN",
     ]) {
       process.env[envVariable] = "someValue";
     }
