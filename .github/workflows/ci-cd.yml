@@ -44,10 +44,10 @@ jobs:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
-          script: whoami
-        #   script: |
-        #     cd /var/www/mpp-rl-server
-        #     git pull origin main
-        #     git status
-        #     npm install --only=prod
-        #     sudo /var/www/infra/setup.sh
+          # script: whoami
+          script: |
+            cd /var/www/mpp-rl-server
+            git pull origin main
+            git status
+            npm install --only=prod
+            sudo /var/www/infra/setup.sh
