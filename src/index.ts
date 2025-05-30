@@ -38,7 +38,9 @@ app.use(helmet());
 app.use(mongoSanitize());
 app.disable("x-powered-by");
 // app.use(favicon(path.join(__dirname, "assets", "favicon.ico")));
+// @ts-expect-error fix for typescript error
 app.use(sessionMiddleware);
+// @ts-expect-error fix for typescript error
 app.use(passport.initialize());
 app.use(passport.session());
 initGoogleStrategy();

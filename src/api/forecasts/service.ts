@@ -22,9 +22,9 @@ export class ForecastService {
     this.psAdapter = psAdapter;
   }
 
-  async getAll(): Promise<ForecastDocument[]> {
+  async getAll(filter: { serieId?: number }): Promise<ForecastDocument[]> {
     try {
-      const forecasts = await Forecast.find({ userId: this.userId });
+      const forecasts = await Forecast.find({ ...filter, userId: this.userId });
 
       return forecasts;
     } catch (err) {
@@ -134,14 +134,14 @@ export class ForecastService {
     }
   }
 
-  async getPointsByUser(userId: string, serieId?: string): Promise<number> {
+  async getPointsByUser(userId: string, serieId?: number): Promise<number> {
     try {
       const res = await Forecast.aggregate([
         {
           $match: {
             userId: String(userId),
             processed: true,
-            ...(serieId ? { serieId: parseInt(serieId) } : {}),
+            ...(serieId ? { serieId } : {}),
           },
         },
         {
@@ -169,17 +169,17 @@ export class ForecastService {
     }
   }
 
-  async getMyPoints(serieId?: string): Promise<number> {
+  async getMyPoints(serieId?: number): Promise<number> {
     return this.getPointsByUser(this.userId, serieId);
   }
 
-  async getPoints(serieId?: string): Promise<{ [userId: string]: number }> {
+  async getPoints(serieId?: number): Promise<{ [userId: string]: number }> {
     try {
       const points = await Forecast.aggregate([
         {
           $match: {
             processed: true,
-            ...(serieId ? { serieId: parseInt(serieId) } : {}),
+            ...(serieId ? { serieId } : {}),
           },
         },
         {

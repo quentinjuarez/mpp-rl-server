@@ -116,6 +116,20 @@ class PandaScoreAdapter {
     });
     return response.data;
   }
+
+  async getAllTournaments(filter: { serieId?: number } = {}) {
+    const parsedFilter: Record<string, unknown> = {};
+    if (filter.serieId) {
+      parsedFilter.serie_id = filter.serieId;
+    }
+
+    const response = await this.client.get<PSTournament[]>("/tournaments", {
+      params: {
+        filter: parsedFilter,
+      },
+    });
+    return response.data;
+  }
 }
 
 export default PandaScoreAdapter;

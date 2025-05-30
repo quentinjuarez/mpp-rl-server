@@ -87,12 +87,12 @@ export async function getLeaderboard(
   next: NextFunction,
 ) {
   try {
-    const { event } = req.query;
+    const { serie_id } = req.query;
     const users = await req.services.userService().getUsers();
 
     const points = await req.services
       .forecastService()
-      .getPoints(event as string | undefined);
+      .getPoints(serie_id ? Number(serie_id) : undefined);
 
     const leaderboard = users.map((user) => ({
       ...user.toObject(),

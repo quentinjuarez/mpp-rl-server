@@ -102,5 +102,17 @@ class PandaScoreAdapter {
         });
         return response.data;
     }
+    async getAllTournaments(filter = {}) {
+        const parsedFilter = {};
+        if (filter.serieId) {
+            parsedFilter.serie_id = filter.serieId;
+        }
+        const response = await this.client.get("/tournaments", {
+            params: {
+                filter: parsedFilter,
+            },
+        });
+        return response.data;
+    }
 }
 exports.default = PandaScoreAdapter;

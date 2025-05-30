@@ -11,9 +11,9 @@ class ForecastService {
         this.userId = userId;
         this.psAdapter = psAdapter;
     }
-    async getAll() {
+    async getAll(filter) {
         try {
-            const forecasts = await forecasts_1.Forecast.find({ userId: this.userId });
+            const forecasts = await forecasts_1.Forecast.find({ ...filter, userId: this.userId });
             return forecasts;
         }
         catch (err) {
@@ -103,7 +103,7 @@ class ForecastService {
                     $match: {
                         userId: String(userId),
                         processed: true,
-                        ...(serieId ? { serieId: parseInt(serieId) } : {}),
+                        ...(serieId ? { serieId } : {}),
                     },
                 },
                 {
@@ -139,7 +139,7 @@ class ForecastService {
                 {
                     $match: {
                         processed: true,
-                        ...(serieId ? { serieId: parseInt(serieId) } : {}),
+                        ...(serieId ? { serieId } : {}),
                     },
                 },
                 {

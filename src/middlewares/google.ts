@@ -27,6 +27,7 @@ const initGoogleStrategy = () => {
         // check if user already exists
         const currentUser = await User.findOne({ externalId: id });
 
+        // @ts-expect-error fix for typescript error
         const authService = ServicesFactory.init(req).authService();
 
         if (currentUser) {

@@ -2,7 +2,11 @@ import { Request, Response, NextFunction } from "express";
 
 export async function getAll(req: Request, res: Response, next: NextFunction) {
   try {
-    const forecasts = await req.services.forecastService().getAll();
+    const { serie_id } = req.query;
+
+    const forecasts = await req.services
+      .forecastService()
+      .getAll(serie_id ? { serieId: Number(serie_id) } : {});
 
     return res.status(200).json({ forecasts }).end();
   } catch (err) {
@@ -65,15 +69,25 @@ export async function getPoints(
   next: NextFunction,
 ) {
   try {
-    const { serieId } = req.query;
+    const { serie_id, enriched } = req.query;
+
+    const isEnriched = enriched === "true";
 
     const forecastService = req.services.forecastService();
 
     await forecastService.computeAllForecasts();
 
     const points = await forecastService.getMyPoints(
-      serieId as string | undefined,
+      serie_id ? Number(serie_id) : undefined,
     );
+
+    if (isEnriched) {
+      const forecasts = await req.services
+        .forecastService()
+        .getAll(serie_id ? { serieId: Number(serie_id) } : {});
+
+      return res.status(200).json({ points, forecasts }).end();
+    }
 
     return res.status(200).json({ points }).end();
   } catch (err) {

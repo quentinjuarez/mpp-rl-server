@@ -6,7 +6,10 @@ exports.getPoints = getPoints;
 exports.getByMatchId = getByMatchId;
 async function getAll(req, res, next) {
     try {
-        const forecasts = await req.services.forecastService().getAll();
+        const { serie_id } = req.query;
+        const forecasts = await req.services
+            .forecastService()
+            .getAll(serie_id ? { serieId: Number(serie_id) } : {});
         return res.status(200).json({ forecasts }).end();
     }
     catch (err) {
@@ -52,10 +55,17 @@ async function createOrUpdate(req, res, next) {
 }
 async function getPoints(req, res, next) {
     try {
-        const { serieId } = req.query;
+        const { serie_id, enriched } = req.query;
+        const isEnriched = enriched === "true";
         const forecastService = req.services.forecastService();
         await forecastService.computeAllForecasts();
-        const points = await forecastService.getMyPoints(serieId);
+        const points = await forecastService.getMyPoints(serie_id ? Number(serie_id) : undefined);
+        if (isEnriched) {
+            const forecasts = await req.services
+                .forecastService()
+                .getAll(serie_id ? { serieId: Number(serie_id) } : {});
+            return res.status(200).json({ points, forecasts }).end();
+        }
         return res.status(200).json({ points }).end();
     }
     catch (err) {
