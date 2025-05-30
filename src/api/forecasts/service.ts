@@ -55,14 +55,14 @@ export class ForecastService {
 
           const showScore =
             String(this.userId) === String(userId) ||
-            forecastObj.date < new Date();
+            new Date(forecastObj.date).getTime() < new Date().getTime();
 
           return {
             ...forecastObj,
             blue: showScore ? forecastObj.blue : -1,
             orange: showScore ? forecastObj.orange : -1,
             match,
-          } as ForecastDocument & { match?: PSMatch };
+          } as unknown as ForecastDocument & { match?: PSMatch };
         });
         return test;
       }

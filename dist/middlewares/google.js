@@ -23,6 +23,7 @@ const initGoogleStrategy = () => {
             throw new Error("BAD_REQUEST");
         // check if user already exists
         const currentUser = await users_1.User.findOne({ externalId: id });
+        // @ts-expect-error fix for typescript error
         const authService = services_1.default.init(req).authService();
         if (currentUser) {
             // already have the user -> login and return token

@@ -36,7 +36,9 @@ app.use((0, helmet_1.default)());
 app.use((0, express_mongo_sanitize_1.default)());
 app.disable("x-powered-by");
 // app.use(favicon(path.join(__dirname, "assets", "favicon.ico")));
+// @ts-expect-error fix for typescript error
 app.use(session_1.default);
+// @ts-expect-error fix for typescript error
 app.use(passport_1.default.initialize());
 app.use(passport_1.default.session());
 (0, google_1.default)();

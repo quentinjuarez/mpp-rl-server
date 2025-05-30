@@ -21,6 +21,7 @@ export type UserDTO = {
 };
 
 export interface UserDocument extends Document {
+  _id: string;
   username: string;
   firstName: string;
   lastName: string;

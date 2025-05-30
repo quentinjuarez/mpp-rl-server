@@ -35,7 +35,7 @@ class ForecastService {
                     const match = matches.find((m) => m.id === forecast.matchId);
                     const forecastObj = forecast.toObject();
                     const showScore = String(this.userId) === String(userId) ||
-                        forecastObj.date < new Date();
+                        new Date(forecastObj.date).getTime() < new Date().getTime();
                     return {
                         ...forecastObj,
                         blue: showScore ? forecastObj.blue : -1,
