@@ -12,5 +12,6 @@ module.exports = () => {
     GOOGLE_CLIENT_ID: "secret",
     GOOGLE_CLIENT_SECRET: "secret",
     GOOGLE_REDIRECT_URI: "secret",
+    PANDASCORE_TOKEN: "secret",
   };
 };
