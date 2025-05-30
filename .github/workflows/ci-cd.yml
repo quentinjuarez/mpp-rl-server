@@ -1,4 +1,4 @@
-name: Node.js CI
+name: Node.js CI/CD
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  publish:
+  build-and-test:
     runs-on: ubuntu-latest
 
     steps:
@@ -30,6 +30,24 @@ jobs:
       - name: Run tests
         run: yarn test
 
-      - name: Build package
-        if: ${{ success() }}
+      - name: Build files
         run: yarn build
+
+  deploy:
+    needs: build-and-test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy using ssh
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.PASSWORD }}
+          script: whoami
+        #   script: |
+        #     cd /var/www/mpp-rl-server
+        #     git pull origin main
+        #     git status
+        #     npm install --only=prod
+        #     sudo /var/www/infra/setup.sh
