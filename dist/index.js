@@ -44,7 +44,7 @@ app.use(passport_1.default.session());
 (0, google_1.default)();
 // Routes
 app.get("/", (_req, res) => {
-    res.json({ message: `${process.env.APP_ID} is healthy` });
+    res.json({ message: `${process.env.APP_ID} is healthy - version 1.0.0` });
 });
 app.use("/api", routes_1.default);
 app.use(errorHandler_1.default);

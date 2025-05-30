@@ -47,7 +47,7 @@ initGoogleStrategy();
 
 // Routes
 app.get("/", (_req, res) => {
-  res.json({ message: `${process.env.APP_ID} is healthy` });
+  res.json({ message: `${process.env.APP_ID} is healthy - version 1.0.0` });
 });
 app.use("/api", apiRoutes);
 
