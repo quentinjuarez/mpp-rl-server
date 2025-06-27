@@ -2,6 +2,7 @@ import type { Logger } from "pino";
 import { User } from "../../models/users";
 import type { UserDocument } from "../../models/users";
 import decryptPassword from "../../utils/decryptPassword";
+import { getPreferencesPayload } from "./utils";
 
 export class UserService {
   private logger: Logger;
@@ -24,7 +25,7 @@ export class UserService {
     }
   }
 
-  private async update(
+  private async updateMe(
     payload: Partial<UserDocument>,
   ): Promise<UserDocument | false> {
     try {
@@ -49,7 +50,7 @@ export class UserService {
   }: {
     username: string;
   }): Promise<UserDocument | false> {
-    return this.update({ username });
+    return this.updateMe({ username });
   }
 
   async updatePassword({
@@ -83,6 +84,24 @@ export class UserService {
       const user = await User.findOne({ username });
 
       return !user;
+    } catch (err) {
+      this.logger.error(err);
+      return false;
+    }
+  }
+
+  async updatePreferences(
+    preferences: Record<string, unknown>,
+  ): Promise<UserDocument | false> {
+    try {
+      const preferencesPayload = getPreferencesPayload(preferences);
+
+      const user = await this.updateMe({
+        preferences: preferencesPayload,
+      });
+      if (!user) return false;
+
+      return user;
     } catch (err) {
       this.logger.error(err);
       return false;

@@ -7,6 +7,7 @@ import {
   checkUsername,
   getLeaderboard,
   getUser,
+  updatePreferences,
 } from "./controller";
 import isAuth from "../../middlewares/isAuth";
 import sanitizeString from "../../middlewares/sanitizeString";
@@ -30,6 +31,7 @@ router.post(
   attachServices,
   updatePassword,
 );
+router.post("/me/preferences", isAuth, attachServices, updatePreferences);
 router.post("/username/check", isAuth, attachServices, checkUsername);
 router.get("/leaderboard", isAuth, attachServices, getLeaderboard);
 router.get("/:username", isAuth, attachServices, getUser);

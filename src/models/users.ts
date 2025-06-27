@@ -20,6 +20,10 @@ export type UserDTO = {
   externalId: string;
 };
 
+export type UserPreferences = {
+  [key: string]: string | number | boolean | object;
+};
+
 export interface UserDocument extends Document {
   _id: string;
   username: string;
@@ -34,6 +38,7 @@ export interface UserDocument extends Document {
   isAdmin: boolean;
   source: SourceType;
   externalId: string;
+  preferences?: UserPreferences;
   createdAt: string;
   updatedAt: string;
 }
@@ -90,6 +95,10 @@ const UserSchema: Schema<UserDocument> = new Schema(
     externalId: {
       type: String,
       default: "",
+    },
+    preferences: {
+      type: Object,
+      default: {},
     },
   },
   { collection: "users", timestamps: true },

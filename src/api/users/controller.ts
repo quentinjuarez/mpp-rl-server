@@ -130,3 +130,34 @@ export async function getUser(req: Request, res: Response, next: NextFunction) {
     return next(err);
   }
 }
+
+export async function updatePreferences(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  try {
+    const { preferences } = req.body;
+
+    if (!preferences || typeof preferences !== "object") {
+      throw new Error("BAD_REQUEST");
+    }
+
+    const user = await req.services
+      .userService()
+      .updatePreferences(preferences);
+
+    if (!user) throw new Error("UNAUTHORIZED");
+
+    const otherFields = user.toObject();
+
+    return res
+      .status(201)
+      .json({
+        preferences: otherFields.preferences,
+      })
+      .end();
+  } catch (err) {
+    return next(err);
+  }
+}

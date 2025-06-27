@@ -20,7 +20,18 @@ class ServicesFactory {
 
   constructor(req: Request) {
     this.userId = req.auth?.userId;
-    this.logger = logger.child({ userId: this.userId });
+    this.logger = logger.child({
+      userId: this.userId,
+      request: {
+        method: req.method,
+        url: req.originalUrl,
+        ip: req.ip,
+        headers: req.headers,
+        body: req.body,
+        query: req.query,
+        params: req.params,
+      },
+    });
   }
 
   static init(req: Request) {
